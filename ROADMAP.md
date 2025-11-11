@@ -20,13 +20,19 @@ Transform NanoBanana into a comprehensive, production-ready AI-powered image edi
 
 ## In Progress 🚧
 
-### Phase 2: Integration & Migration (Q4 2024)
+### Phase 2: Code Quality & Architecture Refinement (Q4 2024)
+- [x] Create comprehensive testing roadmap (TESTING_ROADMAP.md)
+- [x] Document AI integration strategy (AI_INTEGRATION_STRATEGY.md)
+- [x] Create architectural refactoring plan (ARCHITECTURAL_REFACTORING_PLAN.md)
+- [x] Update ARCHITECTURE.md with AI integration details
 - [ ] Migrate MainActivity to use MainViewModel
+- [ ] Remove deprecated NanoBanana and NanoBananaService classes
 - [ ] Integrate new architecture with existing UI components
-- [ ] Remove deprecated/redundant code
+- [ ] Remove redundant code in legacy ai/ package
 - [ ] Add integration tests for complete flows
 - [ ] Enhance UI tests for dual output rendering
 - [ ] Update all components to use new state management
+- [ ] Add ktlint and Detekt for code quality
 
 ## Planned 📅
 
@@ -126,6 +132,8 @@ Transform NanoBanana into a comprehensive, production-ready AI-powered image edi
 - [ ] Implement custom lint rules
 - [ ] Add mutation testing (PIT)
 
+**See [ARCHITECTURAL_REFACTORING_PLAN.md](ARCHITECTURAL_REFACTORING_PLAN.md) for detailed migration strategy.**
+
 ### Testing
 - [ ] Increase unit test coverage to 95%
 - [ ] Add screenshot testing
@@ -133,6 +141,11 @@ Transform NanoBanana into a comprehensive, production-ready AI-powered image edi
 - [ ] Add performance benchmarking tests
 - [ ] Create stress tests for AI service
 - [ ] Add accessibility testing automation
+- [ ] Test edge cases: network failures, memory constraints, input validation
+- [ ] Test multi-modal AI synchronization scenarios
+- [ ] Test loading states and error recovery flows
+
+**See [TESTING_ROADMAP.md](TESTING_ROADMAP.md) for comprehensive testing strategy and timeline.**
 
 ### Performance
 - [ ] Implement Baseline Profiles
@@ -281,9 +294,21 @@ We welcome contributions! Priority areas:
 - Follow Material Design guidelines
 - Credit open-source dependencies
 
+## Documentation References
+
+For detailed information on specific topics, see:
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Complete architecture guide with layer details
+- **[AI_INTEGRATION_STRATEGY.md](AI_INTEGRATION_STRATEGY.md)**: Detailed AI integration strategy and data flow
+- **[ARCHITECTURAL_REFACTORING_PLAN.md](ARCHITECTURAL_REFACTORING_PLAN.md)**: Future architectural refactoring roadmap
+- **[TESTING_ROADMAP.md](TESTING_ROADMAP.md)**: Comprehensive testing coverage roadmap
+- **[ASYNC_ARCHITECTURE.md](ASYNC_ARCHITECTURE.md)**: Async architecture and performance optimization
+- **[TESTING.md](TESTING.md)**: Current testing strategy and guidelines
+- **[SECURITY_SUMMARY.md](SECURITY_SUMMARY.md)**: Security analysis and best practices
+
 ---
 
 **Last Updated**: November 2024  
 **Next Review**: January 2025
 
-For detailed implementation plans, see individual feature documents in `/docs` directory.
+For detailed implementation plans, see individual feature documents referenced above.
