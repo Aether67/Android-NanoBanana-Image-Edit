@@ -330,69 +330,192 @@ Confidence: 80%
 
 ## Quality Validation
 
-### Automatic Validation System
+### Advanced Automatic Validation System
 
-The system performs automatic validation on all AI-generated outputs to ensure quality and trigger re-generation when needed.
+The system performs comprehensive automatic validation on all AI-generated outputs using the `OutputValidator` class to ensure quality and trigger re-generation when needed.
 
 #### Image Validation
 
-**Basic Checks**:
-- Minimum dimensions: 100x100 pixels
-- Valid bitmap data
-- Non-zero byte count
-
-**Future Enhancements** (planned):
-- Artifact detection using edge analysis
-- Color consistency validation
-- Composition quality scoring
-- Compression artifact detection
-
-#### Text Validation
-
-**Current Checks**:
-1. **Minimum Length**: At least 10 characters
-2. **Error Detection**: Filters responses starting with error keywords
-3. **Coherence**: Ensures response is not just error messages
+**Implemented Checks**:
+1. **Dimension Validation**: Minimum 100x100 pixels
+2. **Uniformity Detection**: Detects excessive uniform/blank areas
+3. **Compression Artifact Detection**: Identifies JPEG block artifacts
+4. **Color Distribution Analysis**: Validates balanced color palette
+5. **Edge Coherence Analysis**: Checks for visual coherence using edge detection
 
 **Validation Logic**:
 ```kotlin
-fun isTextValid(text: String): Boolean {
-    val trimmedText = text.trim()
-    
-    // Must have reasonable length
-    if (trimmedText.length < 10) return false
-    
-    // Should not be just error messages
-    val errorKeywords = listOf("error", "failed", "unable", "cannot")
-    val lowerText = trimmedText.lowercase()
-    val hasErrors = errorKeywords.any { keyword ->
-        lowerText.startsWith(keyword) || lowerText.contains("$keyword:")
-    }
-    
-    return !hasErrors
+// Image quality validation with artifact detection
+val validationResult = outputValidator.validate(
+    image = generatedBitmap,
+    text = null,
+    mode = AIOutputMode.IMAGE_ONLY
+)
+
+when {
+    validationResult.passed && validationResult.confidence > 0.9f -> 
+        "Excellent quality output"
+    validationResult.passed && validationResult.confidence > 0.7f -> 
+        "Good quality with minor imperfections"
+    validationResult.shouldRetry -> 
+        "Critical issues detected - retrying..."
+    else -> 
+        "Acceptable quality with noted concerns"
 }
 ```
 
+**Detected Issues**:
+- Excessive uniform areas (uniformity score > 0.95)
+- Compression block artifacts at 8x8 boundaries
+- Extreme color imbalance
+- Low edge coherence (< 0.4)
+- Dimensions below minimum threshold
+
+#### Text Validation
+
+**Implemented Checks**:
+1. **Length Validation**: Minimum 10 characters
+2. **Error Message Detection**: Filters error responses
+3. **Coherence Analysis**: Validates sentence structure
+4. **Contradiction Detection**: Identifies logical contradictions
+5. **Repetition Analysis**: Detects excessive word repetition
+6. **Completeness Check**: Validates proper punctuation
+
+**Validation Logic**:
+```kotlin
+// Text quality validation
+val validationResult = outputValidator.validate(
+    image = null,
+    text = generatedText,
+    mode = AIOutputMode.TEXT_ONLY
+)
+
+// Check for specific issues
+val contradictions = validationResult.issues.filter { 
+    it.type == IssueType.TEXT_CONTRADICTION 
+}
+val coherenceIssues = validationResult.issues.filter {
+    it.type == IssueType.TEXT_QUALITY &&
+    it.message.contains("coherence")
+}
+```
+
+**Detected Issues**:
+- Text too short (< 10 characters)
+- Error keywords present ("error", "failed", "unable", "cannot", "sorry")
+- Incomplete sentences (no ending punctuation)
+- Logical contradictions (e.g., "always" + "never")
+- Excessive repetition (repetition score > 0.3)
+- Low coherence (coherence score < 0.5)
+
+#### Cross-Modal Consistency Validation
+
+For **COMBINED** mode, additional validation ensures alignment between image and text:
+
+**Consistency Checks**:
+- Text references visual elements (keywords: "image", "visual", "color", "composition", "lighting")
+- Descriptive text matches image content
+- Tone and style consistency across modalities
+
+**Example**:
+```kotlin
+val validationResult = outputValidator.validate(
+    image = generatedBitmap,
+    text = generatedText,
+    mode = AIOutputMode.COMBINED
+)
+
+val consistencyIssues = validationResult.issues.filter { 
+    it.type == IssueType.CONSISTENCY 
+}
+if (consistencyIssues.isNotEmpty()) {
+    Log.w(TAG, "Text may not adequately describe the image")
+}
+```
+
+#### Validation Result Structure
+
+**ValidationResult Properties**:
+```kotlin
+data class ValidationResult(
+    val passed: Boolean,           // Overall pass/fail
+    val confidence: Float,          // 0.0 to 1.0 confidence score
+    val issues: List<ValidationIssue>, // Detailed issue list
+    val shouldRetry: Boolean        // Whether to retry generation
+)
+```
+
+**Issue Severity Levels**:
+- **CRITICAL**: Must retry or alert user (e.g., missing content)
+- **MAJOR**: Significant quality concern (e.g., low coherence)
+- **MINOR**: Minor imperfection (e.g., incomplete sentence)
+
+**Confidence Calculation**:
+- Start at 1.0 (100%)
+- CRITICAL issue: -0.5 per issue
+- MAJOR issue: -0.2 per issue
+- MINOR issue: -0.05 per issue
+- Final score clamped to [0.0, 1.0]
+
 #### Retry Mechanism
 
-**Configuration**:
+**Enhanced Configuration**:
 - Maximum attempts: 3
 - Exponential backoff: 2s, 4s, 6s delays
-- Validation between attempts
+- Detailed validation between attempts
+- Confidence-based retry decisions
 
 **Process**:
 ```
 Attempt 1
     ↓
+Generate Content
+    ↓
+Validate Output (OutputValidator)
+    ↓
+Confidence > 0.7 and Passed? → Success
+    ↓
+Has Critical Issues and shouldRetry? → Wait 2s → Attempt 2
+    ↓
 Validation Failed?
     ↓
-Wait 2 seconds → Attempt 2
+Has Critical Issues? → Wait 4s → Attempt 3
     ↓
-Validation Failed?
-    ↓
-Wait 4 seconds → Attempt 3
-    ↓
-Success or Final Error
+Success or Final Error with Detailed Feedback
+```
+
+**Retry Decision Logic**:
+```kotlin
+when {
+    validationResult.passed && validationResult.confidence > 0.9f -> 
+        return result // Accept immediately
+    validationResult.passed && validationResult.confidence > 0.7f -> 
+        return result // Accept with good confidence
+    validationResult.shouldRetry -> 
+        continue // Retry for critical issues
+    else -> 
+        return result // Accept despite issues (no critical problems)
+}
+```
+
+#### User Feedback
+
+The validation system provides user-friendly feedback:
+
+**Simple Messages** (via `getUserMessage()`):
+- "Excellent quality output generated" (confidence > 0.9)
+- "Good quality output with minor imperfections" (confidence > 0.7)
+- "Acceptable output with some quality concerns" (passed but lower confidence)
+- "Quality issues detected: [specific issue]" (failed)
+
+**Detailed Feedback** (via `getDetailedFeedback()`):
+```
+Validation Result: PASSED
+Confidence: 85.0%
+
+Issues (2):
+  - [MINOR] IMAGE_QUALITY: Low edge coherence detected (score: 0.45)
+  - [MINOR] TEXT_QUALITY: Text appears incomplete (no ending punctuation)
 ```
 
 ---

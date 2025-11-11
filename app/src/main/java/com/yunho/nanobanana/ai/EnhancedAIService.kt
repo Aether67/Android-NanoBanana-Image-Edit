@@ -36,6 +36,9 @@ class EnhancedAIService(
         .writeTimeout(60, TimeUnit.SECONDS)
         .build()
     
+    // Advanced output validator for comprehensive quality checks
+    private val outputValidator = OutputValidator()
+    
     /**
      * Generates AI output based on configured mode
      * 
@@ -65,12 +68,30 @@ class EnhancedAIService(
             try {
                 val result = performGeneration(enhancedPrompt, bitmaps, mode)
                 
-                // Validate result quality
-                if (validateResult(result, mode)) {
-                    Log.d(TAG, "Generation successful on attempt ${attempt + 1}")
-                    return result
+                // Advanced validation with detailed feedback
+                val validationResult = when (result) {
+                    is AIGenerationResult.Success -> {
+                        outputValidator.validate(result.image, result.text, mode)
+                    }
+                    else -> null
+                }
+                
+                if (validationResult != null) {
+                    Log.d(TAG, "Validation result (attempt ${attempt + 1}): ${validationResult.getDetailedFeedback()}")
+                    
+                    if (validationResult.passed) {
+                        Log.d(TAG, "Generation successful: ${validationResult.getUserMessage()}")
+                        return result
+                    } else if (!validationResult.shouldRetry) {
+                        // Validation failed but shouldn't retry (e.g., only minor issues)
+                        Log.w(TAG, "Accepting result despite validation issues: ${validationResult.getUserMessage()}")
+                        return result
+                    } else {
+                        Log.w(TAG, "Quality validation failed: ${validationResult.getUserMessage()}")
+                    }
                 } else {
-                    Log.w(TAG, "Quality validation failed on attempt ${attempt + 1}")
+                    // Result is an error
+                    Log.w(TAG, "Generation failed on attempt ${attempt + 1}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Attempt ${attempt + 1} failed: ${e.message}", e)
@@ -250,58 +271,6 @@ class EnhancedAIService(
             Log.e(TAG, "Failed to parse response", e)
             return AIGenerationResult.Error("Parse error: ${e.message}")
         }
-    }
-    
-    /**
-     * Validates generation result quality
-     */
-    private fun validateResult(result: AIGenerationResult, mode: AIOutputMode): Boolean {
-        if (result !is AIGenerationResult.Success) {
-            return false
-        }
-        
-        return when (mode) {
-            AIOutputMode.IMAGE_ONLY -> {
-                result.image != null && isImageValid(result.image)
-            }
-            AIOutputMode.TEXT_ONLY -> {
-                result.text != null && isTextValid(result.text)
-            }
-            AIOutputMode.COMBINED -> {
-                (result.image != null && isImageValid(result.image)) ||
-                (result.text != null && isTextValid(result.text))
-            }
-        }
-    }
-    
-    /**
-     * Basic image quality validation
-     */
-    private fun isImageValid(bitmap: Bitmap): Boolean {
-        // Check basic image properties
-        return bitmap.width > 100 && 
-               bitmap.height > 100 &&
-               bitmap.byteCount > 0
-    }
-    
-    /**
-     * Text coherence validation
-     */
-    private fun isTextValid(text: String): Boolean {
-        // Basic text validation
-        val trimmedText = text.trim()
-        
-        // Must have reasonable length
-        if (trimmedText.length < 10) return false
-        
-        // Should not be just error messages
-        val errorKeywords = listOf("error", "failed", "unable", "cannot")
-        val lowerText = trimmedText.lowercase()
-        val hasErrors = errorKeywords.any { keyword ->
-            lowerText.startsWith(keyword) || lowerText.contains("$keyword:")
-        }
-        
-        return !hasErrors
     }
     
     /**
