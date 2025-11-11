@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.yunho.nanobanana.performance.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -24,9 +25,16 @@ import java.util.concurrent.TimeUnit
 /**
  * Enhanced NanoBanana service with improved error handling and Gemini 2.5 API integration
  * Provides robust image editing capabilities with retry mechanism and comprehensive logging
+ * 
+ * Performance features:
+ * - LRU image caching for faster repeated requests
+ * - Exponential backoff retry with circuit breaker pattern
+ * - Resource-aware quality adjustment
+ * - Performance telemetry and metrics
+ * - Task prioritization for optimal responsiveness
  */
 class NanoBananaService(
-    context: Context
+    private val context: Context
 ) {
     private val client = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
@@ -36,6 +44,12 @@ class NanoBananaService(
         
     private val sharedPreferences = context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
     var apiKey by mutableStateOf("")
+    
+    // Performance components
+    private val imageCache = ImageCache.getInstance()
+    private val metrics = PerformanceMetrics.getInstance()
+    private val retryPolicy = RetryPolicy()
+    private val resourceMonitor = ResourceMonitor(context)
 
     init {
         apiKey = sharedPreferences.getString("api_key", "") ?: ""
@@ -53,57 +67,101 @@ class NanoBananaService(
     }
 
     /**
-     * Edits images using the Gemini 2.5 Flash model with retry mechanism
+     * Edits images using the Gemini 2.5 Flash model with enhanced performance features
+     * - Checks cache first for instant results
+     * - Uses resource-aware quality settings
+     * - Implements retry with exponential backoff and circuit breaker
+     * - Tracks performance metrics
+     * 
      * @param prompt The text prompt for image transformation
      * @param bitmaps List of input images to transform
-     * @return The generated bitmap or null if the operation fails
+     * @return The generated bitmap or throws exception on failure
      */
     suspend fun editImage(
         prompt: String,
         bitmaps: List<Bitmap>
-    ): Bitmap? {
+    ): Bitmap? = withContext(DispatcherProvider.mediumPriority) {
         if (apiKey.isBlank()) {
             Log.e(TAG, "API key is missing")
-            return null
+            throw IllegalStateException("API key is required")
         }
-
-        val imageBase64List = bitmaps.map { bitmapToBase64(it) }
         
-        // Retry mechanism for better reliability
-        var attempt = 0
-        val maxAttempts = 3
+        // Check cache first
+        val cachedResult = imageCache.get(prompt, bitmaps)
+        if (cachedResult != null) {
+            metrics.recordCacheHit()
+            Log.d(TAG, "Returning cached result")
+            return@withContext cachedResult
+        }
+        metrics.recordCacheMiss()
         
-        while (attempt < maxAttempts) {
+        // Check resource constraints
+        val resourceStatus = resourceMonitor.getResourceStatus()
+        if (!resourceStatus.hasNetwork) {
+            throw IllegalStateException("No network connection available")
+        }
+        
+        if (resourceStatus.isLowMemory) {
+            Log.w(TAG, "Low memory detected, using reduced quality")
+        }
+        
+        // Use retry policy with exponential backoff
+        val startTime = System.currentTimeMillis()
+        metrics.recordApiCall()
+        
+        val result = retryPolicy.executeWithRetry(
+            maxAttempts = 3,
+            initialDelayMs = 1000,
+            maxDelayMs = 10000,
+            backoffMultiplier = 2.0
+        ) { attempt ->
             try {
-                val result = editImageWithPrompt(prompt, imageBase64List)
-                if (result != null) {
-                    Log.d(TAG, "Image generation successful on attempt ${attempt + 1}")
-                    return result
-                }
+                editImageWithPrompt(
+                    prompt = prompt,
+                    imageBase64List = bitmaps.map { bitmapToBase64(it, resourceStatus.recommendedQuality) },
+                    attempt = attempt
+                )
             } catch (e: Exception) {
-                Log.e(TAG, "Attempt ${attempt + 1} failed: ${e.message}", e)
-            }
-            
-            attempt++
-            if (attempt < maxAttempts) {
-                Log.d(TAG, "Retrying in ${attempt * 2} seconds...")
-                delay(attempt * 2000L) // Exponential backoff
+                Log.e(TAG, "Attempt $attempt failed: ${e.message}", e)
+                null
             }
         }
         
-        Log.e(TAG, "All $maxAttempts attempts failed")
-        return null
+        val elapsed = System.currentTimeMillis() - startTime
+        
+        result.fold(
+            onSuccess = { bitmap ->
+                metrics.recordApiSuccess(elapsed)
+                // Cache the result
+                imageCache.put(prompt, bitmaps, bitmap)
+                bitmap
+            },
+            onFailure = { exception ->
+                val errorType = when {
+                    exception is RetryPolicy.CircuitBreakerException -> "CircuitBreaker"
+                    exception.message?.contains("timeout") == true -> "Timeout"
+                    exception.message?.contains("network") == true -> "Network"
+                    exception.message?.contains("401") == true -> "Unauthorized"
+                    exception.message?.contains("429") == true -> "RateLimit"
+                    else -> "Unknown"
+                }
+                metrics.recordApiFailure(errorType, exception.message ?: "Unknown error")
+                throw exception
+            }
+        )
     }
 
     /**
      * Sends request to Gemini 2.5 Flash API for image generation
      * @param prompt The transformation prompt
      * @param imageBase64List Base64 encoded images
+     * @param attempt Current attempt number for logging
      * @return Generated bitmap or null if failed
      */
     private suspend fun editImageWithPrompt(
         prompt: String,
-        imageBase64List: List<String>
+        imageBase64List: List<String>,
+        attempt: Int = 1
     ): Bitmap? {
         return withContext(Dispatchers.IO) {
             val url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent"
@@ -143,7 +201,7 @@ class NanoBananaService(
                 .build()
 
             try {
-                Log.d(TAG, "Sending request to Gemini 2.5 Flash API")
+                Log.d(TAG, "Sending request to Gemini 2.5 Flash API (attempt $attempt)")
                 
                 client.newCall(req).execute().use { response ->
                     val rawText = response.body?.string().orEmpty()
@@ -157,12 +215,13 @@ class NanoBananaService(
                             val errorMessage = errorJson.optJSONObject("error")?.optString("message")
                             if (errorMessage != null) {
                                 Log.e(TAG, "API Error: $errorMessage")
+                                throw Exception("API Error (${response.code}): $errorMessage")
                             }
                         } catch (e: Exception) {
                             Log.e(TAG, "Could not parse error response", e)
                         }
                         
-                        return@withContext null
+                        throw Exception("HTTP ${response.code}: Request failed")
                     }
 
                     Log.d(TAG, "Response received successfully")
@@ -204,13 +263,14 @@ class NanoBananaService(
                         }
                     } catch (e: Exception) {
                         Log.e(TAG, "Failed to parse image from response", e)
+                        throw e
                     }
 
                     return@withContext null
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Request failed", e)
-                return@withContext null
+                throw e
             }
         }
     }
@@ -218,17 +278,46 @@ class NanoBananaService(
     /**
      * Converts bitmap to Base64 encoded JPEG with optimized quality
      * @param bitmap The bitmap to encode
+     * @param quality JPEG quality (0-100), defaults to 95
      * @return Base64 encoded string
      */
-    fun bitmapToBase64(bitmap: Bitmap): String {
+    fun bitmapToBase64(bitmap: Bitmap, quality: Int = 95): String {
         val outputStream = ByteArrayOutputStream()
         
-        // Optimize image quality for better processing
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)
+        // Use resource-aware quality setting
+        bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
         
         val byteArray = outputStream.toByteArray()
         
         return Base64.encodeToString(byteArray, Base64.NO_WRAP)
+    }
+    
+    /**
+     * Gets performance metrics summary
+     */
+    fun getMetrics(): PerformanceMetrics.PerformanceSummary {
+        return metrics.getSummary()
+    }
+    
+    /**
+     * Gets resource status
+     */
+    fun getResourceStatus(): ResourceMonitor.ResourceStatus {
+        return resourceMonitor.getResourceStatus()
+    }
+    
+    /**
+     * Logs current performance metrics
+     */
+    fun logPerformanceMetrics() {
+        metrics.logSummary()
+    }
+    
+    /**
+     * Clears the image cache
+     */
+    fun clearCache() {
+        imageCache.clear()
     }
 
     companion object {
