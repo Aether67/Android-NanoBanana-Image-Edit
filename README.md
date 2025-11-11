@@ -367,13 +367,61 @@ See [TESTING.md](TESTING.md) for detailed testing strategies and guidelines.
 
 Comprehensive documentation for developers and contributors:
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed architecture guide
+### Architecture & Design
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Complete architecture guide
   - Layer responsibilities and boundaries
   - Data flow diagrams
   - Dependency injection setup
   - Best practices and patterns
+  - AI integration architecture
   
-- **[ASYNC_ARCHITECTURE.md](ASYNC_ARCHITECTURE.md)**: 🔥 NEW! Async architecture guide
+- **[AI_INTEGRATION_STRATEGY.md](AI_INTEGRATION_STRATEGY.md)**: 🔥 NEW! Detailed AI architecture
+  - Dual data streams (visual + semantic outputs)
+  - Asynchronous processing pipeline
+  - Caching and retry strategies
+  - Device adaptation and performance
+  - Security considerations
+  
+- **[ARCHITECTURAL_REFACTORING_PLAN.md](ARCHITECTURAL_REFACTORING_PLAN.md)**: 🔥 NEW! Future roadmap
+  - 16-month evolution plan (Q4 2024 - Q1 2026)
+  - Hilt DI migration strategy
+  - Multi-module architecture
+  - MVI pattern enhancement
+  - Kotlin Multiplatform support
+
+### Testing Strategy
+- **[TESTING.md](TESTING.md)**: Current testing strategy
+  - Unit, integration, and UI testing
+  - Test organization and patterns
+  - CI/CD pipeline configuration
+  - Coverage goals and metrics
+  
+- **[TESTING_ROADMAP.md](TESTING_ROADMAP.md)**: 🔥 NEW! Comprehensive testing roadmap
+  - 14-month testing strategy (Q1 2025 - Q1 2026)
+  - Edge cases and error scenarios
+  - Multi-modal AI integration testing
+  - Performance and load testing
+  - UI/UX test automation
+  - CI/CD enhancement
+  
+### Development & Quality
+- **[CONTRIBUTING.md](CONTRIBUTING.md)**: 🔥 NEW! Contribution guidelines
+  - Code of conduct
+  - Kotlin coding standards
+  - Architecture best practices
+  - Testing requirements
+  - Pull request process
+  - Code review guidelines
+
+- **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)**: 🔥 NEW! Build optimization guide
+  - Gradle performance optimizations
+  - Kotlin compiler settings
+  - APK size reduction strategies
+  - CI/CD configuration
+  - Troubleshooting guide
+
+### Implementation Guides
+- **[ASYNC_ARCHITECTURE.md](ASYNC_ARCHITECTURE.md)**: Async architecture guide
   - Parallel processing pipelines
   - Caching strategies
   - Task prioritization
@@ -393,17 +441,12 @@ Comprehensive documentation for developers and contributors:
   - Data security
   - Best practices
   
-- **[TESTING.md](TESTING.md)**: Complete testing strategy
-  - Unit, integration, and UI testing
-  - Test organization and patterns
-  - CI/CD pipeline configuration
-  - Coverage goals and metrics
-  
 - **[MODERNIZATION.md](MODERNIZATION.md)**: Complete modernization details
   - Animation specifications
   - API integration details
   - Best practices implemented
   
+### UI/UX Documentation
 - **[UI_ENHANCEMENTS.md](UI_ENHANCEMENTS.md)**: UI/UX enhancements
   - Multi-layered adaptive blur effects
   - Shimmer and ripple animations
@@ -415,23 +458,49 @@ Comprehensive documentation for developers and contributors:
   - Swipe gestures for undo/redo
   - Enhanced skeleton loaders and transitions
 
+### Roadmap & Planning
+- **[ROADMAP.md](ROADMAP.md)**: Product roadmap
+  - Completed features (Phase 1)
+  - In-progress items (Phase 2)
+  - Planned features (Phases 3-6)
+  - Success metrics and timeline
+
+- **[REFACTORING_COMPLETE_SUMMARY.md](REFACTORING_COMPLETE_SUMMARY.md)**: 🔥 NEW! Refactoring summary
+  - Executive summary of all refactoring work
+  - Accomplishments and status
+  - Architecture principles
+  - Success metrics and next steps
+
 ## 📦 Contributing
+
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) guide for:
+- Code of conduct
+- Development setup
+- Kotlin coding standards
+- Architecture guidelines
+- Testing requirements
+- Pull request process
+
+### Quick Start
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Make your changes following the existing code style
-4. Add comprehensive documentation
-5. Test your changes thoroughly
+3. Follow the coding standards in [CONTRIBUTING.md](CONTRIBUTING.md)
+4. Write tests for your changes
+5. Ensure all tests pass (`./gradlew check`)
 6. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 7. Push to the branch (`git push origin feature/AmazingFeature`)
 8. Open a Pull Request
 
 ### Development Guidelines
-- Follow Material Design 3 guidelines
+- Follow Kotlin idiomatic best practices
 - Add animations for new UI elements
 - Include accessibility support
-- Write KDoc comments
+- Write comprehensive KDoc comments
 - Test on multiple screen sizes
+- Maintain or improve code coverage
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 📄 License
 
