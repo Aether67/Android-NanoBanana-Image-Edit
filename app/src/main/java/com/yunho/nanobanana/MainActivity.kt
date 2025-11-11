@@ -609,7 +609,7 @@ private fun PickerContent(
 }
 
 /**
- * Enhanced loading screen with blur and shimmer effects
+ * Enhanced loading screen with multi-layered blur, shimmer, and ripple effects
  */
 @Composable
 private fun LoadingContent() {
@@ -623,37 +623,47 @@ private fun LoadingContent() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Animated pulsing glow effect
-        val infiniteTransition = rememberInfiniteTransition(label = "loading_glow")
-        val glowAlpha by infiniteTransition.animateFloat(
-            initialValue = 0.3f,
-            targetValue = 0.8f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(1500, easing = FastOutSlowInEasing),
-                repeatMode = RepeatMode.Reverse
-            ),
-            label = "glow_alpha"
-        )
-
         Box(
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(200.dp)
         ) {
-            // Glow background
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .blur(24.dp)
-                    .background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
-                        CircleShape
-                    )
+            // Ripple animation background
+            RippleProcessingIndicator(
+                modifier = Modifier.size(200.dp)
             )
             
-            CircularProgressIndicator(
-                modifier = Modifier.size(64.dp),
-                strokeWidth = 6.dp,
-                color = MaterialTheme.colorScheme.primary
+            // Animated pulsing glow effect
+            val infiniteTransition = rememberInfiniteTransition(label = "loading_glow")
+            val glowAlpha by infiniteTransition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 0.8f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1500, easing = FastOutSlowInEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "glow_alpha"
             )
+
+            Box(
+                contentAlignment = Alignment.Center
+            ) {
+                // Glow background
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .blur(24.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                            CircleShape
+                        )
+                )
+                
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp),
+                    strokeWidth = 6.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -676,9 +686,16 @@ private fun LoadingContent() {
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Using Gemini 2.5 Flash",
+                    text = "Using Gemini 2.0 Flash",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Shimmer indicator for processing
+                TextGenerationShimmer(
+                    text = "Processing"
                 )
             }
         }

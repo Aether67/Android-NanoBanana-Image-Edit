@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Enhanced generate button with Material 3 animations and haptic feedback
+ * Enhanced generate button with Material 3 animations, haptic feedback, and elevation changes
  */
 @Composable
 fun Generate(
@@ -35,7 +35,7 @@ fun Generate(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
-    // Animated scale for press effect
+    // Animated scale for press effect with haptic feedback
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = spring(
@@ -64,8 +64,9 @@ fun Generate(
                 scaleX = scale
                 scaleY = scale
             }
+            .responsiveRipple(intensity = HapticIntensity.MEDIUM) { onClick() }
             .semantics {
-                contentDescription = "Generate AI image button - tap to start image generation"
+                contentDescription = "Generate AI image button - tap to start image generation with haptic feedback"
             },
         interactionSource = interactionSource,
         elevation = ButtonDefaults.elevatedButtonElevation(

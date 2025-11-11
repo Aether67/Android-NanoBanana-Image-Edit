@@ -7,37 +7,50 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateListOf
 import com.yunho.nanobanana.NanoBanana.Content.Picker
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 
+/**
+ * Enhanced NanoBanana core logic with Kotlin Flow and StateFlow
+ * Provides real-time UI updates with reactive state management
+ */
 class NanoBanana(
     private val nanoBananaService: NanoBananaService,
 ) : Channel<NanoBanana.Request> by Channel() {
-    val content = mutableStateOf<Content>(Picker(queue = this))
-
+    
+    // StateFlow for reactive state management
+    private val _contentState = MutableStateFlow<Content>(Picker(queue = this))
+    val contentState: StateFlow<Content> = _contentState.asStateFlow()
+    
+    // Legacy mutableState for backward compatibility
+    val content = _contentState
+    
     suspend fun launch() {
         consumeAsFlow().collect { request ->
-            content.value = Content.Loading
-
+            // Update state to loading
+            _contentState.value = Content.Loading
+            
             val result = nanoBananaService.editImage(
                 prompt = request.prompt,
                 bitmaps = request.selectedBitmaps
             )
-
-            content.value = result?.let {
+            
+            // Update state with result or error
+            _contentState.value = result?.let {
                 Content.Result(
                     result = it,
-                    content = content,
+                    contentState = _contentState,
                     queue = this
                 )
             } ?: Content.Error(
-                message = "Failed to edit image",
-                content = content,
+                message = "Failed to edit image. Please check your API key and try again.",
+                contentState = _contentState,
                 queue = this
             )
         }
@@ -51,10 +64,12 @@ class NanoBanana(
     sealed interface Content {
 
         interface Reset {
-            val content: MutableState<Content>
+            val contentState: MutableStateFlow<Content>
             val queue: Channel<Request>
 
-            fun reset()
+            fun reset() {
+                contentState.value = Picker(queue = queue)
+            }
         }
 
         data class Picker(
@@ -109,25 +124,18 @@ class NanoBanana(
         }
 
         data object Loading : Content
+        
         data class Result(
             val result: Bitmap,
-            override val content: MutableState<Content>,
+            override val contentState: MutableStateFlow<Content>,
             override val queue: Channel<Request>
-        ) : Content, Reset {
-            override fun reset() {
-                content.value = Picker(queue = queue)
-            }
-        }
+        ) : Content, Reset
 
         data class Error(
             val message: String,
-            override val content: MutableState<Content>,
+            override val contentState: MutableStateFlow<Content>,
             override val queue: Channel<Request>
-        ) : Content, Reset {
-            override fun reset() {
-                content.value = Picker(queue = queue)
-            }
-        }
+        ) : Content, Reset
     }
 
     companion object {
