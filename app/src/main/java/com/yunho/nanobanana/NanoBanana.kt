@@ -10,6 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateListOf
 import com.yunho.nanobanana.NanoBanana.Content.Picker
+import com.yunho.nanobanana.ai.PromptManager
+import com.yunho.nanobanana.ai.EnhancedAIService
+import com.yunho.nanobanana.ai.AIGenerationResult
+import com.yunho.nanobanana.ai.AIOutputMode
+import com.yunho.nanobanana.components.AIReasoning
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,10 +24,15 @@ import kotlinx.coroutines.flow.consumeAsFlow
 /**
  * Enhanced NanoBanana core logic with Kotlin Flow and StateFlow
  * Provides real-time UI updates with reactive state management
+ * Now includes AI reasoning capabilities and multi-modal output support
  */
 class NanoBanana(
     private val nanoBananaService: NanoBananaService,
+    val promptManager: PromptManager,
 ) : Channel<NanoBanana.Request> by Channel() {
+    
+    // Enhanced AI Service for multi-modal generation
+    private var enhancedAIService: EnhancedAIService? = null
     
     // StateFlow for reactive state management
     private val _contentState = MutableStateFlow<Content>(Picker(queue = this))
@@ -33,26 +43,66 @@ class NanoBanana(
     
     suspend fun launch() {
         consumeAsFlow().collect { request ->
-            // Update state to loading
-            _contentState.value = Content.Loading
+            // Initialize enhanced service if not already done
+            if (enhancedAIService == null && nanoBananaService.apiKey.isNotBlank()) {
+                enhancedAIService = EnhancedAIService(nanoBananaService.apiKey, promptManager)
+            }
             
-            val result = nanoBananaService.editImage(
-                prompt = request.prompt,
-                bitmaps = request.selectedBitmaps
-            )
+            // Update state to loading with reasoning
+            val reasoning = when (promptManager.outputMode) {
+                AIOutputMode.IMAGE_ONLY -> AIReasoning.forImageGeneration(request.prompt)
+                AIOutputMode.TEXT_ONLY -> AIReasoning.forTextGeneration(request.prompt)
+                AIOutputMode.COMBINED -> AIReasoning.forCombinedGeneration(request.prompt)
+            }
+            _contentState.value = Content.Loading(reasoning = reasoning)
+            
+            // Try enhanced service first if available, fallback to legacy
+            val result = if (enhancedAIService != null && promptManager.outputMode != AIOutputMode.IMAGE_ONLY) {
+                // Use enhanced service for multi-modal support
+                val enhancedResult = enhancedAIService!!.generateWithMode(
+                    basePrompt = request.prompt,
+                    bitmaps = request.selectedBitmaps,
+                    mode = promptManager.outputMode
+                )
+                
+                when (enhancedResult) {
+                    is AIGenerationResult.Success -> enhancedResult
+                    is AIGenerationResult.Error -> {
+                        Log.e("NanoBanana", "Enhanced service failed: ${enhancedResult.message}")
+                        null
+                    }
+                }
+            } else {
+                // Use legacy service for image-only mode
+                val bitmap = nanoBananaService.editImage(
+                    prompt = request.prompt,
+                    bitmaps = request.selectedBitmaps
+                )
+                if (bitmap != null) {
+                    AIGenerationResult.Success(image = bitmap)
+                } else {
+                    null
+                }
+            }
             
             // Update state with result or error
-            _contentState.value = result?.let {
-                Content.Result(
-                    result = it,
-                    contentState = _contentState,
-                    queue = this
-                )
-            } ?: Content.Error(
-                message = "Failed to edit image. Please check your API key and try again.",
-                contentState = _contentState,
-                queue = this
-            )
+            _contentState.value = when (result) {
+                is AIGenerationResult.Success -> {
+                    Content.Result(
+                        resultImage = result.image,
+                        resultText = result.text,
+                        contentState = _contentState,
+                        queue = this
+                    )
+                }
+                else -> {
+                    Content.Error(
+                        message = "Failed to generate output. Please check your API key and try again.",
+                        contentState = _contentState,
+                        queue = this
+                    )
+                }
+            }
         }
     }
 
@@ -123,13 +173,19 @@ class NanoBanana(
             }
         }
 
-        data object Loading : Content
+        data class Loading(
+            val reasoning: AIReasoning = AIReasoning()
+        ) : Content
         
         data class Result(
-            val result: Bitmap,
+            val resultImage: Bitmap? = null,
+            val resultText: String? = null,
             override val contentState: MutableStateFlow<Content>,
             override val queue: Channel<Request>
-        ) : Content, Reset
+        ) : Content, Reset {
+            // Backward compatibility
+            val result: Bitmap? get() = resultImage
+        }
 
         data class Error(
             val message: String,
@@ -141,7 +197,13 @@ class NanoBanana(
     companion object {
         @Composable
         fun rememberNanoBanana(
-            nanoBananaService: NanoBananaService
-        ): NanoBanana = remember { NanoBanana(nanoBananaService = nanoBananaService) }
+            nanoBananaService: NanoBananaService,
+            promptManager: PromptManager
+        ): NanoBanana = remember { 
+            NanoBanana(
+                nanoBananaService = nanoBananaService,
+                promptManager = promptManager
+            )
+        }
     }
 }
