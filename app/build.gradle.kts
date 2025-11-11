@@ -24,19 +24,43 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            
+            // Build optimization
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
         debug {
             isMinifyEnabled = false
+            
+            // Faster debug builds
+            ndk {
+                debugSymbolLevel = "NONE"
+            }
         }
     }
 
+    // Build performance optimizations
+    kotlinOptions {
+        jvmTarget = "11"
+        
+        // Incremental compilation
+        freeCompilerArgs += listOf(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-Xjvm-default=all"
+        )
+    }
+    
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11"
+        
+        // Incremental compilation
+        isCoreLibraryDesugaringEnabled = false
     }
     buildFeatures {
         compose = true
