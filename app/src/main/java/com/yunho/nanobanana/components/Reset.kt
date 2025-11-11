@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Enhanced reset button with rotation animation and accessibility
+ * Enhanced reset button with haptic feedback, rotation animation and accessibility
  */
 @Composable
 fun Reset(
@@ -61,8 +61,9 @@ fun Reset(
                 scaleX = scale
                 scaleY = scale
             }
+            .responsiveRipple(intensity = HapticIntensity.MEDIUM) { onClick() }
             .semantics {
-                contentDescription = "Reset to start over with new images button"
+                contentDescription = "Reset to start over with new images button with haptic feedback"
             },
         interactionSource = interactionSource,
         elevation = ButtonDefaults.elevatedButtonElevation(

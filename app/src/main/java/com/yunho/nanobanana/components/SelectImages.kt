@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Enhanced select images button with scale animation and accessibility
+ * Enhanced select images button with haptic feedback, scale animation and accessibility
  */
 @Composable
 fun SelectImages(
@@ -51,8 +51,9 @@ fun SelectImages(
                 scaleX = scale
                 scaleY = scale
             }
+            .responsiveRipple(intensity = HapticIntensity.LIGHT) { onClick() }
             .semantics {
-                contentDescription = "Select images from gallery button"
+                contentDescription = "Select images from gallery button with haptic feedback"
             },
         interactionSource = interactionSource,
         colors = ButtonDefaults.elevatedButtonColors(

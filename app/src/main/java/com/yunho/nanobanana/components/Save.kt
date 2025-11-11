@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 /**
- * Enhanced save button with press animation and accessibility
+ * Enhanced save button with haptic feedback, press animation and accessibility
  */
 @Composable
 fun Save(
@@ -47,8 +47,9 @@ fun Save(
                 scaleX = scale
                 scaleY = scale
             }
+            .responsiveRipple(intensity = HapticIntensity.MEDIUM) { onClick() }
             .semantics {
-                contentDescription = "Save generated image to gallery button"
+                contentDescription = "Save generated image to gallery button with haptic feedback"
             },
         interactionSource = interactionSource,
         colors = ButtonDefaults.elevatedButtonColors(
