@@ -244,19 +244,35 @@ class PromptManager(context: Context) {
     /**
      * Gets a template prompt for a specific use case
      */
-    fun getTemplatePrompt(template: PromptTemplate): String {
+    fun getTemplatePrompt(template: PromptTemplate, customInput: String = ""): String {
         return when (template) {
             PromptTemplate.IMAGE_EXPLANATION -> 
                 "Analyze this image and explain what you see, including key visual elements, composition, and artistic choices."
             PromptTemplate.IMAGE_TRANSFORMATION_GUIDE -> 
-                "Explain how to transform this image to achieve [desired result], including step-by-step reasoning and expected outcomes."
+                "Explain how to transform this image to achieve ${customInput.ifEmpty { "[desired result]" }}, including step-by-step reasoning and expected outcomes."
             PromptTemplate.CREATIVE_SUGGESTION -> 
                 "Suggest creative ways to enhance this image, with reasoning for each suggestion."
             PromptTemplate.TECHNICAL_ANALYSIS -> 
                 "Provide a technical analysis of this image, including resolution, composition, lighting, and potential improvements."
             PromptTemplate.ARTISTIC_COMMENTARY -> 
                 "Offer artistic commentary on this image, discussing style, mood, color theory, and visual impact."
+            PromptTemplate.QUALITY_IMPROVEMENT ->
+                "Analyze this image for potential quality improvements. Identify any artifacts, composition issues, or color inconsistencies, and suggest specific enhancements."
+            PromptTemplate.STYLE_TRANSFER ->
+                "Transform this image to ${customInput.ifEmpty { "[target style]" }} style, maintaining the core subject while adapting visual elements to match the new aesthetic."
+            PromptTemplate.IMAGE_ENHANCEMENT ->
+                "Enhance this image by improving clarity, color balance, and overall visual appeal while preserving natural appearance."
+            PromptTemplate.COMPARATIVE_ANALYSIS ->
+                "Compare and analyze the differences between the original and transformed versions of this image, highlighting improvements and changes."
         }
+    }
+    
+    /**
+     * Applies a template with current parameters
+     */
+    fun applyTemplate(template: PromptTemplate, customInput: String = ""): String {
+        val basePrompt = getTemplatePrompt(template, customInput)
+        return generatePrompt(basePrompt, outputMode, includeReasoning = true)
     }
     
     /**
@@ -297,5 +313,9 @@ enum class PromptTemplate(val displayName: String) {
     IMAGE_TRANSFORMATION_GUIDE("Transformation Guide"),
     CREATIVE_SUGGESTION("Creative Suggestions"),
     TECHNICAL_ANALYSIS("Technical Analysis"),
-    ARTISTIC_COMMENTARY("Artistic Commentary")
+    ARTISTIC_COMMENTARY("Artistic Commentary"),
+    QUALITY_IMPROVEMENT("Quality Improvement"),
+    STYLE_TRANSFER("Style Transfer"),
+    IMAGE_ENHANCEMENT("Image Enhancement"),
+    COMPARATIVE_ANALYSIS("Comparative Analysis")
 }

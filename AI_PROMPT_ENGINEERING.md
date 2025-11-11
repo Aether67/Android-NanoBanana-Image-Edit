@@ -330,69 +330,192 @@ Confidence: 80%
 
 ## Quality Validation
 
-### Automatic Validation System
+### Advanced Automatic Validation System
 
-The system performs automatic validation on all AI-generated outputs to ensure quality and trigger re-generation when needed.
+The system performs comprehensive automatic validation on all AI-generated outputs using the `OutputValidator` class to ensure quality and trigger re-generation when needed.
 
 #### Image Validation
 
-**Basic Checks**:
-- Minimum dimensions: 100x100 pixels
-- Valid bitmap data
-- Non-zero byte count
-
-**Future Enhancements** (planned):
-- Artifact detection using edge analysis
-- Color consistency validation
-- Composition quality scoring
-- Compression artifact detection
-
-#### Text Validation
-
-**Current Checks**:
-1. **Minimum Length**: At least 10 characters
-2. **Error Detection**: Filters responses starting with error keywords
-3. **Coherence**: Ensures response is not just error messages
+**Implemented Checks**:
+1. **Dimension Validation**: Minimum 100x100 pixels
+2. **Uniformity Detection**: Detects excessive uniform/blank areas
+3. **Compression Artifact Detection**: Identifies JPEG block artifacts
+4. **Color Distribution Analysis**: Validates balanced color palette
+5. **Edge Coherence Analysis**: Checks for visual coherence using edge detection
 
 **Validation Logic**:
 ```kotlin
-fun isTextValid(text: String): Boolean {
-    val trimmedText = text.trim()
-    
-    // Must have reasonable length
-    if (trimmedText.length < 10) return false
-    
-    // Should not be just error messages
-    val errorKeywords = listOf("error", "failed", "unable", "cannot")
-    val lowerText = trimmedText.lowercase()
-    val hasErrors = errorKeywords.any { keyword ->
-        lowerText.startsWith(keyword) || lowerText.contains("$keyword:")
-    }
-    
-    return !hasErrors
+// Image quality validation with artifact detection
+val validationResult = outputValidator.validate(
+    image = generatedBitmap,
+    text = null,
+    mode = AIOutputMode.IMAGE_ONLY
+)
+
+when {
+    validationResult.passed && validationResult.confidence > 0.9f -> 
+        "Excellent quality output"
+    validationResult.passed && validationResult.confidence > 0.7f -> 
+        "Good quality with minor imperfections"
+    validationResult.shouldRetry -> 
+        "Critical issues detected - retrying..."
+    else -> 
+        "Acceptable quality with noted concerns"
 }
 ```
 
+**Detected Issues**:
+- Excessive uniform areas (uniformity score > 0.95)
+- Compression block artifacts at 8x8 boundaries
+- Extreme color imbalance
+- Low edge coherence (< 0.4)
+- Dimensions below minimum threshold
+
+#### Text Validation
+
+**Implemented Checks**:
+1. **Length Validation**: Minimum 10 characters
+2. **Error Message Detection**: Filters error responses
+3. **Coherence Analysis**: Validates sentence structure
+4. **Contradiction Detection**: Identifies logical contradictions
+5. **Repetition Analysis**: Detects excessive word repetition
+6. **Completeness Check**: Validates proper punctuation
+
+**Validation Logic**:
+```kotlin
+// Text quality validation
+val validationResult = outputValidator.validate(
+    image = null,
+    text = generatedText,
+    mode = AIOutputMode.TEXT_ONLY
+)
+
+// Check for specific issues
+val contradictions = validationResult.issues.filter { 
+    it.type == IssueType.TEXT_CONTRADICTION 
+}
+val coherenceIssues = validationResult.issues.filter {
+    it.type == IssueType.TEXT_QUALITY &&
+    it.message.contains("coherence")
+}
+```
+
+**Detected Issues**:
+- Text too short (< 10 characters)
+- Error keywords present ("error", "failed", "unable", "cannot", "sorry")
+- Incomplete sentences (no ending punctuation)
+- Logical contradictions (e.g., "always" + "never")
+- Excessive repetition (repetition score > 0.3)
+- Low coherence (coherence score < 0.5)
+
+#### Cross-Modal Consistency Validation
+
+For **COMBINED** mode, additional validation ensures alignment between image and text:
+
+**Consistency Checks**:
+- Text references visual elements (keywords: "image", "visual", "color", "composition", "lighting")
+- Descriptive text matches image content
+- Tone and style consistency across modalities
+
+**Example**:
+```kotlin
+val validationResult = outputValidator.validate(
+    image = generatedBitmap,
+    text = generatedText,
+    mode = AIOutputMode.COMBINED
+)
+
+val consistencyIssues = validationResult.issues.filter { 
+    it.type == IssueType.CONSISTENCY 
+}
+if (consistencyIssues.isNotEmpty()) {
+    Log.w(TAG, "Text may not adequately describe the image")
+}
+```
+
+#### Validation Result Structure
+
+**ValidationResult Properties**:
+```kotlin
+data class ValidationResult(
+    val passed: Boolean,           // Overall pass/fail
+    val confidence: Float,          // 0.0 to 1.0 confidence score
+    val issues: List<ValidationIssue>, // Detailed issue list
+    val shouldRetry: Boolean        // Whether to retry generation
+)
+```
+
+**Issue Severity Levels**:
+- **CRITICAL**: Must retry or alert user (e.g., missing content)
+- **MAJOR**: Significant quality concern (e.g., low coherence)
+- **MINOR**: Minor imperfection (e.g., incomplete sentence)
+
+**Confidence Calculation**:
+- Start at 1.0 (100%)
+- CRITICAL issue: -0.5 per issue
+- MAJOR issue: -0.2 per issue
+- MINOR issue: -0.05 per issue
+- Final score clamped to [0.0, 1.0]
+
 #### Retry Mechanism
 
-**Configuration**:
+**Enhanced Configuration**:
 - Maximum attempts: 3
 - Exponential backoff: 2s, 4s, 6s delays
-- Validation between attempts
+- Detailed validation between attempts
+- Confidence-based retry decisions
 
 **Process**:
 ```
 Attempt 1
     ↓
+Generate Content
+    ↓
+Validate Output (OutputValidator)
+    ↓
+Confidence > 0.7 and Passed? → Success
+    ↓
+Has Critical Issues and shouldRetry? → Wait 2s → Attempt 2
+    ↓
 Validation Failed?
     ↓
-Wait 2 seconds → Attempt 2
+Has Critical Issues? → Wait 4s → Attempt 3
     ↓
-Validation Failed?
-    ↓
-Wait 4 seconds → Attempt 3
-    ↓
-Success or Final Error
+Success or Final Error with Detailed Feedback
+```
+
+**Retry Decision Logic**:
+```kotlin
+when {
+    validationResult.passed && validationResult.confidence > 0.9f -> 
+        return result // Accept immediately
+    validationResult.passed && validationResult.confidence > 0.7f -> 
+        return result // Accept with good confidence
+    validationResult.shouldRetry -> 
+        continue // Retry for critical issues
+    else -> 
+        return result // Accept despite issues (no critical problems)
+}
+```
+
+#### User Feedback
+
+The validation system provides user-friendly feedback:
+
+**Simple Messages** (via `getUserMessage()`):
+- "Excellent quality output generated" (confidence > 0.9)
+- "Good quality output with minor imperfections" (confidence > 0.7)
+- "Acceptable output with some quality concerns" (passed but lower confidence)
+- "Quality issues detected: [specific issue]" (failed)
+
+**Detailed Feedback** (via `getDetailedFeedback()`):
+```
+Validation Result: PASSED
+Confidence: 85.0%
+
+Issues (2):
+  - [MINOR] IMAGE_QUALITY: Low edge coherence detected (score: 0.45)
+  - [MINOR] TEXT_QUALITY: Text appears incomplete (no ending punctuation)
 ```
 
 ---
@@ -568,13 +691,26 @@ power of nature's daily spectacles.
 
 ### Example 4: Using Prompt Templates
 
+**Available Templates**:
+1. **IMAGE_EXPLANATION** - Comprehensive image analysis
+2. **IMAGE_TRANSFORMATION_GUIDE** - Step-by-step transformation instructions
+3. **CREATIVE_SUGGESTION** - Creative enhancement ideas
+4. **TECHNICAL_ANALYSIS** - Technical image evaluation
+5. **ARTISTIC_COMMENTARY** - Artistic interpretation
+6. **QUALITY_IMPROVEMENT** - Artifact detection and quality suggestions
+7. **STYLE_TRANSFER** - Style transformation guidance
+8. **IMAGE_ENHANCEMENT** - General enhancement instructions
+9. **COMPARATIVE_ANALYSIS** - Before/after comparison
+
+#### Template Example: IMAGE_TRANSFORMATION_GUIDE
+
 **Template**: IMAGE_TRANSFORMATION_GUIDE
 
-**User Input**: Apply template to "vintage film look"
+**User Input**: "vintage film look"
 
 **Generated Prompt**:
 ```
-Explain how to transform this image to achieve a vintage film look, including 
+Explain how to transform this image to achieve vintage film look, including 
 step-by-step reasoning and expected outcomes.
 ```
 
@@ -624,6 +760,162 @@ which paradoxically became its aesthetic strengths. By understanding why these
 artifacts occurred in analog processes, we can recreate them intentionally with 
 greater authenticity and artistic control.
 ```
+
+---
+
+### Example 5: Quality Improvement Template
+
+**Template**: QUALITY_IMPROVEMENT
+
+**User Input**: (applied to generated image)
+
+**Configuration**:
+- Mode: COMBINED
+- Style: TECHNICAL
+- Detail Level: 4
+- Reasoning Depth: 3
+
+**Enhanced Prompt**:
+```
+Analyze this image for potential quality improvements. Identify any artifacts, 
+composition issues, or color inconsistencies, and suggest specific enhancements.
+
+Generate a highly detailed, professional-grade image with proper resolution and 
+clarity. Ensure artifact-free output with natural colors and lighting.
+
+Provide a technical breakdown of the generated image, including:
+- What changes were made and why
+- Key visual elements and their significance
+- Artistic or technical considerations
+- Reasoning behind creative decisions
+- Hypotheses about viewer perception
+```
+
+**Expected Output**:
+
+*Image*: Enhanced version with corrected artifacts and improved quality
+
+*Text*:
+```
+Quality Analysis and Improvements
+
+Detected Issues (Original):
+1. Compression artifacts visible in gradient areas (8x8 JPEG blocks)
+2. Color banding in sky region due to insufficient bit depth
+3. Minor edge haloing from over-sharpening
+4. Slight color cast toward cyan in shadow areas
+
+Applied Enhancements:
+
+Artifact Removal:
+- Applied selective gaussian blur to 8x8 block boundaries
+- Used gradient smoothing algorithm to eliminate banding
+- Reduced sharpening radius from 1.5px to 0.8px to eliminate haloing
+- Corrected shadow color temperature by +200K
+
+Composition Refinement:
+- Applied rule of thirds overlay and adjusted key elements to intersections
+- Enhanced leading lines through selective contrast adjustment
+- Improved depth perception through atmospheric perspective enhancement
+
+Color Correction:
+- Balanced color histogram to remove cyan shadow cast
+- Enhanced saturation in midtones by 12% for visual pop
+- Applied color grading curve: slight S-curve for improved contrast
+
+Technical Improvements:
+- Upsampled to eliminate compression artifacts
+- Applied smart sharpening with edge-aware masking
+- Enhanced dynamic range through local contrast optimization
+
+Results:
+The enhanced image exhibits professional-grade quality with:
+- Eliminated compression artifacts and banding
+- Natural, balanced color palette
+- Improved visual hierarchy and composition
+- Enhanced depth and dimensionality
+- Professional finish suitable for print or digital display
+
+Confidence Level: 95%
+The improvements address all detected quality issues while maintaining the 
+original creative intent and visual style.
+```
+
+---
+
+### Example 6: Style Transfer Template
+
+**Template**: STYLE_TRANSFER
+
+**User Input**: "impressionist painting"
+
+**Configuration**:
+- Mode: COMBINED
+- Style: CREATIVE
+- Creativity: 0.85
+- Detail Level: 4
+
+**Enhanced Prompt**:
+```
+Transform this image to impressionist painting style, maintaining the core subject 
+while adapting visual elements to match the new aesthetic.
+
+Generate a highly detailed, professional-grade image with proper resolution and 
+clarity. Ensure artifact-free output with natural colors and lighting.
+
+Provide an insightful commentary of the generated image, including:
+- What changes were made and why
+- Key visual elements and their significance
+- Artistic or technical considerations
+- Reasoning behind creative decisions
+- Hypotheses about viewer perception
+```
+
+**Expected Output**:
+
+*Image*: Original photo transformed into impressionist style with visible brushstrokes, 
+broken color, and emphasis on light effects
+
+*Text*:
+```
+Impressionist Transformation: Capturing Light and Atmosphere
+
+Artistic Transformation:
+The original photograph has been reimagined through the lens of late 19th-century 
+impressionism, emphasizing fleeting effects of light and atmosphere over precise detail.
+
+Technical Execution:
+
+Brushwork Application:
+- Implemented short, broken brushstrokes characteristic of Monet and Renoir
+- Varied stroke direction to suggest form and movement
+- Used impasto technique in highlights for textural depth
+- Applied comma-shaped strokes for foliage areas
+
+Color Theory Implementation:
+- Employed broken color technique: placing pure colors side-by-side rather than mixing
+- Enhanced complementary color relationships (blue/orange, red/green)
+- Avoided black in shadows, using deep purples and blues instead
+- Maximized luminosity through high-key color choices
+
+Light and Atmosphere:
+- Emphasized dappled light effects and color reflections
+- Softened edges to create atmospheric perspective
+- Enhanced color temperature contrasts between sunlit and shadowed areas
+- Captured the transient quality of natural light
+
+Compositional Choices:
+The impressionist approach prioritizes overall visual effect over photographic accuracy. 
+The viewer's eye naturally blends the separate color strokes from a distance, creating 
+a more vibrant and luminous image than traditional photorealistic rendering would allow.
+
+Historical Context:
+This transformation echoes the revolutionary approach of artists like Claude Monet, 
+who sought to capture the immediate visual impression rather than detailed accuracy. 
+The technique celebrates the ephemeral nature of light and the subjective experience 
+of seeing.
+```
+
 
 ---
 
