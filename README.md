@@ -68,6 +68,16 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 
 ## 🚀 Technical Highlights
 
+### Advanced Async Architecture 🔥 NEW!
+- **Parallel Processing Pipeline**: Simultaneous image and text generation using Kotlin Coroutines
+- **Intelligent Caching**: LRU cache with JPEG compression (60-70% memory reduction)
+- **Task Prioritization**: 5-level priority system ensuring UI responsiveness
+- **Exponential Backoff Retry**: Automatic retry with jitter for transient failures
+- **Device Adaptation**: Automatic quality adjustment based on device tier (HIGH/MID/LOW_END)
+- **Graceful Degradation**: 4-mode system (NORMAL → REDUCED → MINIMAL → EMERGENCY)
+- **Comprehensive Telemetry**: Real-time monitoring of latency, errors, cache performance
+- **Memory Safety**: Automatic memory pressure detection and optimization
+
 ### Modern Architecture
 - **MVVM Pattern**: Clean separation of UI, business logic, and data
 - **Jetpack Compose**: Modern declarative UI toolkit
@@ -76,11 +86,11 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 - **Material Motion**: Official Material Design 3 motion specifications
 
 ### Performance Optimizations
-- **Async Processing**: Non-blocking image generation
+- **Async Processing**: Non-blocking image generation with parallel pipelines
 - **Reactive Updates**: StateFlow for instant UI synchronization
 - **Progressive Loading**: Multi-layered adaptive blur effects
 - **Optimized Bitmap Handling**: Efficient image compression and encoding
-- **Smart Caching**: Persistent API key storage
+- **Smart Caching**: Thread-safe LRU cache with automatic eviction
 
 ### Code Quality
 - **Comprehensive Documentation**: KDoc comments throughout
@@ -362,6 +372,26 @@ Comprehensive documentation for developers and contributors:
   - Data flow diagrams
   - Dependency injection setup
   - Best practices and patterns
+  
+- **[ASYNC_ARCHITECTURE.md](ASYNC_ARCHITECTURE.md)**: 🔥 NEW! Async architecture guide
+  - Parallel processing pipelines
+  - Caching strategies
+  - Task prioritization
+  - Device adaptation and graceful degradation
+  - Performance optimization techniques
+  - Monitoring and telemetry
+  
+- **[ASYNC_IMPLEMENTATION_SUMMARY.md](ASYNC_IMPLEMENTATION_SUMMARY.md)**: Implementation summary
+  - Architecture overview
+  - Performance metrics
+  - Security considerations
+  - Production readiness checklist
+  
+- **[SECURITY_SUMMARY.md](SECURITY_SUMMARY.md)**: Security review
+  - Vulnerability analysis
+  - Thread safety
+  - Data security
+  - Best practices
   
 - **[TESTING.md](TESTING.md)**: Complete testing strategy
   - Unit, integration, and UI testing
