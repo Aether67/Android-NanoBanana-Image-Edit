@@ -9,6 +9,7 @@ import com.yunho.nanobanana.data.repository.EnhancedAIRepositoryImpl
 import com.yunho.nanobanana.data.repository.SettingsRepositoryImpl
 import com.yunho.nanobanana.domain.repository.AIRepository
 import com.yunho.nanobanana.domain.repository.SettingsRepository
+import com.yunho.nanobanana.domain.usecase.EnhanceImageUseCase
 import com.yunho.nanobanana.domain.usecase.GenerateAIContentUseCase
 import com.yunho.nanobanana.domain.usecase.ManageAIParametersUseCase
 import com.yunho.nanobanana.domain.usecase.ManageApiKeyUseCase
@@ -52,6 +53,10 @@ class AppContainer(private val context: Context) {
         GenerateAIContentUseCase(aiRepository)
     }
     
+    private val enhanceImageUseCase: EnhanceImageUseCase by lazy {
+        EnhanceImageUseCase(aiRepository)
+    }
+    
     private val manageApiKeyUseCase: ManageApiKeyUseCase by lazy {
         ManageApiKeyUseCase(settingsRepository)
     }
@@ -64,6 +69,7 @@ class AppContainer(private val context: Context) {
     fun createMainViewModel(): MainViewModel {
         return MainViewModel(
             generateContentUseCase = generateAIContentUseCase,
+            enhanceImageUseCase = enhanceImageUseCase,
             manageApiKeyUseCase = manageApiKeyUseCase,
             manageParametersUseCase = manageParametersUseCase
         )

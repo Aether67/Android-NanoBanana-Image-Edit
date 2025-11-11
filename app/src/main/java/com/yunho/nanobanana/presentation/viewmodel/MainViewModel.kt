@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.yunho.nanobanana.domain.model.AIGenerationResult
 import com.yunho.nanobanana.domain.model.AIOutputMode
 import com.yunho.nanobanana.domain.model.AIParameters
+import com.yunho.nanobanana.domain.model.EnhancementResult
+import com.yunho.nanobanana.domain.model.ImageEnhancementRequest
 import com.yunho.nanobanana.domain.model.ImageGenerationRequest
+import com.yunho.nanobanana.domain.usecase.EnhanceImageUseCase
 import com.yunho.nanobanana.domain.usecase.GenerateAIContentUseCase
 import com.yunho.nanobanana.domain.usecase.ManageAIParametersUseCase
 import com.yunho.nanobanana.domain.usecase.ManageApiKeyUseCase
@@ -29,6 +32,7 @@ import javax.inject.Inject
  */
 class MainViewModel @Inject constructor(
     private val generateContentUseCase: GenerateAIContentUseCase,
+    private val enhanceImageUseCase: EnhanceImageUseCase,
     private val manageApiKeyUseCase: ManageApiKeyUseCase,
     private val manageParametersUseCase: ManageAIParametersUseCase
 ) : ViewModel() {
@@ -221,7 +225,7 @@ class MainViewModel @Inject constructor(
         if (imageToEnhance == null) {
             _uiState.update {
                 it.copy(
-                    enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Error(
+                    enhancementState = EnhancementResult.Error(
                         "No image available to enhance",
                         com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
                     )
@@ -237,37 +241,42 @@ class MainViewModel @Inject constructor(
             com.yunho.nanobanana.domain.model.EnhancementType.DETAIL_SHARPEN
         }
         
-        val request = com.yunho.nanobanana.domain.model.ImageEnhancementRequest(
+        val request = ImageEnhancementRequest(
             image = imageToEnhance,
             enhancementType = enhancementType,
             targetRegion = targetRegion,
             intensity = 0.7f
         )
         
-        // Use the enhancement use case (to be injected)
-        viewModelScope.launch {
-            try {
-                // This will be implemented when we add EnhanceImageUseCase to the constructor
-                // For now, we'll use a placeholder that will be replaced
-                _uiState.update {
-                    it.copy(
-                        enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Loading(
-                            0f,
-                            "Enhancement feature ready. Use case needs to be injected."
-                        )
-                    )
+        // Use the enhancement use case
+        enhanceImageUseCase(request)
+            .onEach { result ->
+                _uiState.update { state ->
+                    when (result) {
+                        is EnhancementResult.Success -> {
+                            // Update the generated image with enhanced version
+                            state.copy(
+                                generationState = (state.generationState as? GenerationState.Success)?.copy(
+                                    image = result.enhancedImage
+                                ) ?: state.generationState,
+                                enhancementState = result
+                            )
+                        }
+                        else -> state.copy(enhancementState = result)
+                    }
                 }
-            } catch (e: Exception) {
+            }
+            .catch { e ->
                 _uiState.update {
                     it.copy(
-                        enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Error(
+                        enhancementState = EnhancementResult.Error(
                             e.message ?: "Enhancement failed",
                             com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
                         )
                     )
                 }
             }
-        }
+            .launchIn(viewModelScope)
     }
     
     /**
