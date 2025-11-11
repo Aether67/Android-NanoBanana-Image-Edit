@@ -207,6 +207,79 @@ class MainViewModel @Inject constructor(
     }
     
     /**
+     * Enhance the currently generated image
+     */
+    fun enhanceImage(targetRegion: android.graphics.Rect? = null) {
+        val currentState = _uiState.value
+        
+        // Get the generated image from current state
+        val imageToEnhance = when (val genState = currentState.generationState) {
+            is GenerationState.Success -> genState.image
+            else -> null
+        }
+        
+        if (imageToEnhance == null) {
+            _uiState.update {
+                it.copy(
+                    enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Error(
+                        "No image available to enhance",
+                        com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
+                    )
+                )
+            }
+            return
+        }
+        
+        // Create enhancement request
+        val enhancementType = if (targetRegion != null) {
+            com.yunho.nanobanana.domain.model.EnhancementType.LOCALIZED_ENHANCE
+        } else {
+            com.yunho.nanobanana.domain.model.EnhancementType.DETAIL_SHARPEN
+        }
+        
+        val request = com.yunho.nanobanana.domain.model.ImageEnhancementRequest(
+            image = imageToEnhance,
+            enhancementType = enhancementType,
+            targetRegion = targetRegion,
+            intensity = 0.7f
+        )
+        
+        // Use the enhancement use case (to be injected)
+        viewModelScope.launch {
+            try {
+                // This will be implemented when we add EnhanceImageUseCase to the constructor
+                // For now, we'll use a placeholder that will be replaced
+                _uiState.update {
+                    it.copy(
+                        enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Loading(
+                            0f,
+                            "Enhancement feature ready. Use case needs to be injected."
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        enhancementState = com.yunho.nanobanana.domain.model.EnhancementResult.Error(
+                            e.message ?: "Enhancement failed",
+                            com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
+                        )
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Clear enhancement state
+     */
+    fun clearEnhancementState() {
+        _uiState.update {
+            it.copy(enhancementState = null)
+        }
+    }
+    
+    /**
      * Reset to idle state
      */
     fun resetToIdle() {
@@ -214,7 +287,8 @@ class MainViewModel @Inject constructor(
             it.copy(
                 generationState = GenerationState.Idle,
                 selectedImages = emptyList(),
-                currentPrompt = ""
+                currentPrompt = "",
+                enhancementState = null
             )
         }
     }
