@@ -25,7 +25,26 @@ import kotlinx.coroutines.flow.consumeAsFlow
  * Enhanced NanoBanana core logic with Kotlin Flow and StateFlow
  * Provides real-time UI updates with reactive state management
  * Now includes AI reasoning capabilities and multi-modal output support
+ * 
+ * @deprecated This class is deprecated and will be removed in a future version.
+ * Use [com.yunho.nanobanana.presentation.viewmodel.MainViewModel] instead.
+ * The new architecture provides better separation of concerns, testability,
+ * and follows MVVM pattern with Clean Architecture principles.
+ * 
+ * Migration guide:
+ * - Replace NanoBanana usage with MainViewModel
+ * - Use MainUiState instead of Content sealed class
+ * - Observe uiState StateFlow for reactive updates
+ * - See ARCHITECTURE.md for detailed migration instructions
  */
+@Deprecated(
+    message = "Use MainViewModel from presentation layer instead",
+    replaceWith = ReplaceWith(
+        "MainViewModel",
+        "com.yunho.nanobanana.presentation.viewmodel.MainViewModel"
+    ),
+    level = DeprecationLevel.WARNING
+)
 class NanoBanana(
     private val nanoBananaService: NanoBananaService,
     val promptManager: PromptManager,
