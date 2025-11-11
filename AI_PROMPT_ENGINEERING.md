@@ -691,13 +691,26 @@ power of nature's daily spectacles.
 
 ### Example 4: Using Prompt Templates
 
+**Available Templates**:
+1. **IMAGE_EXPLANATION** - Comprehensive image analysis
+2. **IMAGE_TRANSFORMATION_GUIDE** - Step-by-step transformation instructions
+3. **CREATIVE_SUGGESTION** - Creative enhancement ideas
+4. **TECHNICAL_ANALYSIS** - Technical image evaluation
+5. **ARTISTIC_COMMENTARY** - Artistic interpretation
+6. **QUALITY_IMPROVEMENT** - Artifact detection and quality suggestions
+7. **STYLE_TRANSFER** - Style transformation guidance
+8. **IMAGE_ENHANCEMENT** - General enhancement instructions
+9. **COMPARATIVE_ANALYSIS** - Before/after comparison
+
+#### Template Example: IMAGE_TRANSFORMATION_GUIDE
+
 **Template**: IMAGE_TRANSFORMATION_GUIDE
 
-**User Input**: Apply template to "vintage film look"
+**User Input**: "vintage film look"
 
 **Generated Prompt**:
 ```
-Explain how to transform this image to achieve a vintage film look, including 
+Explain how to transform this image to achieve vintage film look, including 
 step-by-step reasoning and expected outcomes.
 ```
 
@@ -747,6 +760,162 @@ which paradoxically became its aesthetic strengths. By understanding why these
 artifacts occurred in analog processes, we can recreate them intentionally with 
 greater authenticity and artistic control.
 ```
+
+---
+
+### Example 5: Quality Improvement Template
+
+**Template**: QUALITY_IMPROVEMENT
+
+**User Input**: (applied to generated image)
+
+**Configuration**:
+- Mode: COMBINED
+- Style: TECHNICAL
+- Detail Level: 4
+- Reasoning Depth: 3
+
+**Enhanced Prompt**:
+```
+Analyze this image for potential quality improvements. Identify any artifacts, 
+composition issues, or color inconsistencies, and suggest specific enhancements.
+
+Generate a highly detailed, professional-grade image with proper resolution and 
+clarity. Ensure artifact-free output with natural colors and lighting.
+
+Provide a technical breakdown of the generated image, including:
+- What changes were made and why
+- Key visual elements and their significance
+- Artistic or technical considerations
+- Reasoning behind creative decisions
+- Hypotheses about viewer perception
+```
+
+**Expected Output**:
+
+*Image*: Enhanced version with corrected artifacts and improved quality
+
+*Text*:
+```
+Quality Analysis and Improvements
+
+Detected Issues (Original):
+1. Compression artifacts visible in gradient areas (8x8 JPEG blocks)
+2. Color banding in sky region due to insufficient bit depth
+3. Minor edge haloing from over-sharpening
+4. Slight color cast toward cyan in shadow areas
+
+Applied Enhancements:
+
+Artifact Removal:
+- Applied selective gaussian blur to 8x8 block boundaries
+- Used gradient smoothing algorithm to eliminate banding
+- Reduced sharpening radius from 1.5px to 0.8px to eliminate haloing
+- Corrected shadow color temperature by +200K
+
+Composition Refinement:
+- Applied rule of thirds overlay and adjusted key elements to intersections
+- Enhanced leading lines through selective contrast adjustment
+- Improved depth perception through atmospheric perspective enhancement
+
+Color Correction:
+- Balanced color histogram to remove cyan shadow cast
+- Enhanced saturation in midtones by 12% for visual pop
+- Applied color grading curve: slight S-curve for improved contrast
+
+Technical Improvements:
+- Upsampled to eliminate compression artifacts
+- Applied smart sharpening with edge-aware masking
+- Enhanced dynamic range through local contrast optimization
+
+Results:
+The enhanced image exhibits professional-grade quality with:
+- Eliminated compression artifacts and banding
+- Natural, balanced color palette
+- Improved visual hierarchy and composition
+- Enhanced depth and dimensionality
+- Professional finish suitable for print or digital display
+
+Confidence Level: 95%
+The improvements address all detected quality issues while maintaining the 
+original creative intent and visual style.
+```
+
+---
+
+### Example 6: Style Transfer Template
+
+**Template**: STYLE_TRANSFER
+
+**User Input**: "impressionist painting"
+
+**Configuration**:
+- Mode: COMBINED
+- Style: CREATIVE
+- Creativity: 0.85
+- Detail Level: 4
+
+**Enhanced Prompt**:
+```
+Transform this image to impressionist painting style, maintaining the core subject 
+while adapting visual elements to match the new aesthetic.
+
+Generate a highly detailed, professional-grade image with proper resolution and 
+clarity. Ensure artifact-free output with natural colors and lighting.
+
+Provide an insightful commentary of the generated image, including:
+- What changes were made and why
+- Key visual elements and their significance
+- Artistic or technical considerations
+- Reasoning behind creative decisions
+- Hypotheses about viewer perception
+```
+
+**Expected Output**:
+
+*Image*: Original photo transformed into impressionist style with visible brushstrokes, 
+broken color, and emphasis on light effects
+
+*Text*:
+```
+Impressionist Transformation: Capturing Light and Atmosphere
+
+Artistic Transformation:
+The original photograph has been reimagined through the lens of late 19th-century 
+impressionism, emphasizing fleeting effects of light and atmosphere over precise detail.
+
+Technical Execution:
+
+Brushwork Application:
+- Implemented short, broken brushstrokes characteristic of Monet and Renoir
+- Varied stroke direction to suggest form and movement
+- Used impasto technique in highlights for textural depth
+- Applied comma-shaped strokes for foliage areas
+
+Color Theory Implementation:
+- Employed broken color technique: placing pure colors side-by-side rather than mixing
+- Enhanced complementary color relationships (blue/orange, red/green)
+- Avoided black in shadows, using deep purples and blues instead
+- Maximized luminosity through high-key color choices
+
+Light and Atmosphere:
+- Emphasized dappled light effects and color reflections
+- Softened edges to create atmospheric perspective
+- Enhanced color temperature contrasts between sunlit and shadowed areas
+- Captured the transient quality of natural light
+
+Compositional Choices:
+The impressionist approach prioritizes overall visual effect over photographic accuracy. 
+The viewer's eye naturally blends the separate color strokes from a distance, creating 
+a more vibrant and luminous image than traditional photorealistic rendering would allow.
+
+Historical Context:
+This transformation echoes the revolutionary approach of artists like Claude Monet, 
+who sought to capture the immediate visual impression rather than detailed accuracy. 
+The technique celebrates the ephemeral nature of light and the subjective experience 
+of seeing.
+```
+
 
 ---
 
