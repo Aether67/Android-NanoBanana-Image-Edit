@@ -40,8 +40,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yunho.nanobanana.NanoBanana.Companion.rememberNanoBanana
 import com.yunho.nanobanana.NanoBananaService.Companion.rememberNanoBananaService
+import com.yunho.nanobanana.ai.PromptManager
 import com.yunho.nanobanana.animations.MotionTokens
+import com.yunho.nanobanana.components.AIParameterControls
+import com.yunho.nanobanana.components.AIReasoningFeedback
 import com.yunho.nanobanana.components.ApiKeySetting
+import com.yunho.nanobanana.components.ElegantTextOutput
 import com.yunho.nanobanana.components.Generate
 import com.yunho.nanobanana.components.PickedImages
 import com.yunho.nanobanana.components.PickerTitle
