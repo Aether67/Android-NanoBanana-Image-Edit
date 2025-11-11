@@ -24,7 +24,26 @@ import java.util.concurrent.TimeUnit
 /**
  * Enhanced NanoBanana service with improved error handling and Gemini 2.5 API integration
  * Provides robust image editing capabilities with retry mechanism and comprehensive logging
+ * 
+ * @deprecated This service is deprecated and will be removed in a future version.
+ * Use [com.yunho.nanobanana.data.datasource.GeminiAIDataSource] instead.
+ * The new data layer provides better abstraction, testability, and follows
+ * Clean Architecture principles with repository pattern.
+ * 
+ * Migration guide:
+ * - Replace NanoBananaService with GeminiAIDataSource
+ * - Use AIRepository for coordinated operations
+ * - Use SettingsRepository for API key management
+ * - See ARCHITECTURE.md for detailed migration instructions
  */
+@Deprecated(
+    message = "Use GeminiAIDataSource from data layer instead",
+    replaceWith = ReplaceWith(
+        "GeminiAIDataSource",
+        "com.yunho.nanobanana.data.datasource.GeminiAIDataSource"
+    ),
+    level = DeprecationLevel.WARNING
+)
 class NanoBananaService(
     context: Context
 ) {
