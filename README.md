@@ -70,11 +70,17 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 - **Material Motion**: Official Material Design 3 motion specifications
 
 ### Performance Optimizations
-- **Async Processing**: Non-blocking image generation
+- **LRU Image Caching**: Intelligent memory-efficient caching (1/8 of available memory)
+- **Text Response Caching**: TTL-based caching with 30-minute expiry
+- **Task Prioritization**: Three-tier priority system (HIGH/MEDIUM/LOW)
+- **Async Processing**: Non-blocking image generation with coroutine dispatchers
 - **Reactive Updates**: StateFlow for instant UI synchronization
 - **Progressive Loading**: Multi-layered adaptive blur effects
-- **Optimized Bitmap Handling**: Efficient image compression and encoding
-- **Smart Caching**: Persistent API key storage
+- **Optimized Bitmap Handling**: Resource-aware quality adjustment (95%/85%/75%)
+- **Exponential Backoff Retry**: Resilient retry with circuit breaker pattern
+- **Resource Monitoring**: Real-time memory and network detection
+- **Performance Telemetry**: Comprehensive metrics tracking (latency, cache hits, memory)
+- **Graceful Degradation**: Adaptive feature availability based on device resources
 
 ### Code Quality
 - **Comprehensive Documentation**: KDoc comments throughout
@@ -139,7 +145,7 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 app/src/main/java/com/yunho/nanobanana/
 ├── MainActivity.kt              # Main activity with enhanced UI composition
 ├── NanoBanana.kt               # Core business logic and state management
-├── NanoBananaService.kt        # Enhanced AI service with retry logic
+├── NanoBananaService.kt        # Enhanced AI service with retry logic and caching
 ├── animations/                  # Animation utilities
 │   └── MaterialMotion.kt       # Material Design 3 motion specifications
 ├── components/                  # Reusable UI components
@@ -156,6 +162,14 @@ app/src/main/java/com/yunho/nanobanana/
 │   ├── PickerTitle.kt         # Title component
 │   ├── TextOutput.kt          # Elegant text display with scrolling and selection
 │   └── HapticGestures.kt      # Haptic feedback and gesture utilities
+├── performance/                 # Performance optimization components
+│   ├── ImageCache.kt          # LRU-based image caching
+│   ├── TextCache.kt           # TTL-based text caching
+│   ├── TaskPriority.kt        # Task prioritization and dispatchers
+│   ├── PerformanceMetrics.kt  # Telemetry and metrics tracking
+│   ├── RetryPolicy.kt         # Exponential backoff with circuit breaker
+│   ├── ResourceMonitor.kt     # System resource monitoring
+│   └── ErrorMessages.kt       # User-friendly error messages
 ├── extension/                  # Utility extensions
 │   └── Context.kt             # Context extension functions
 └── ui/theme/                   # Material Design 3 theming
@@ -203,10 +217,12 @@ app/src/main/java/com/yunho/nanobanana/
 - **Backward Compatible**: Legacy mutableState support maintained
 
 ### Error Handling
-- **Retry Logic**: Up to 3 attempts with exponential backoff
-- **User Feedback**: Clear error messages with helpful guidance
+- **Retry Logic**: Up to 3 attempts with exponential backoff and jitter
+- **Circuit Breaker**: Automatic service protection after 5 consecutive failures
+- **User Feedback**: Context-aware error messages with actionable tips
 - **API Logging**: Detailed logs for debugging
 - **Graceful Degradation**: App remains responsive during errors
+- **Resource Awareness**: Adaptive quality based on device constraints
 
 ## 📦 Dependencies
 
@@ -248,6 +264,19 @@ See these documentation files for detailed information:
   - Kotlin Flow & StateFlow integration
   - Haptic feedback and gesture support
   - Testing scenarios and coverage guidelines
+- [PERFORMANCE.md](PERFORMANCE.md) - Performance optimization documentation
+  - LRU image caching with memory management
+  - Exponential backoff retry with circuit breaker
+  - Task prioritization and resource monitoring
+  - Performance telemetry and metrics
+  - Graceful degradation strategies
+  - Configuration and troubleshooting
+- [SECURITY.md](SECURITY.md) - Security considerations
+  - Thread-safe operations
+  - Memory management safeguards
+  - API key security best practices
+  - Network security protections
+  - Privacy and compliance
 
 ## 🤝 Contributing
 

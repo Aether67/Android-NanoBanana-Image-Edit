@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateListOf
 import com.yunho.nanobanana.NanoBanana.Content.Picker
+import com.yunho.nanobanana.performance.ErrorMessages
+import com.yunho.nanobanana.performance.PerformanceMetrics
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,23 +38,34 @@ class NanoBanana(
             // Update state to loading
             _contentState.value = Content.Loading
             
-            val result = nanoBananaService.editImage(
-                prompt = request.prompt,
-                bitmaps = request.selectedBitmaps
-            )
-            
-            // Update state with result or error
-            _contentState.value = result?.let {
-                Content.Result(
-                    result = it,
+            try {
+                val result = nanoBananaService.editImage(
+                    prompt = request.prompt,
+                    bitmaps = request.selectedBitmaps
+                )
+                
+                // Update state with result
+                _contentState.value = result?.let {
+                    Content.Result(
+                        result = it,
+                        contentState = _contentState,
+                        queue = this
+                    )
+                } ?: Content.Error(
+                    message = "Failed to generate image. Please try again.",
                     contentState = _contentState,
                     queue = this
                 )
-            } ?: Content.Error(
-                message = "Failed to edit image. Please check your API key and try again.",
-                contentState = _contentState,
-                queue = this
-            )
+            } catch (e: Exception) {
+                Log.e("NanoBanana", "Error editing image", e)
+                // Use enhanced error messages
+                val errorMessage = ErrorMessages.getErrorMessage(e)
+                _contentState.value = Content.Error(
+                    message = errorMessage,
+                    contentState = _contentState,
+                    queue = this
+                )
+            }
         }
     }
 
