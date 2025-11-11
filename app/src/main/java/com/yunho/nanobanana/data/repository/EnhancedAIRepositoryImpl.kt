@@ -58,49 +58,88 @@ class EnhancedAIRepositoryImpl @Inject constructor(
         taskPrioritization = taskPrioritization
     )
     
+    // Graceful degradation manager
+    private val degradationManager = GracefulDegradationManager(
+        deviceCapabilities = capabilities,
+        deviceCapabilityDetector = deviceCapability
+    )
+    
+    // Bitmap optimizer
+    private val bitmapOptimizer = BitmapOptimizer(capabilities)
+    
     override fun generateContent(request: ImageGenerationRequest): Flow<AIGenerationResult> = flow {
         val cacheKey = generateCacheKey(request)
+        
+        // Evaluate degradation mode
+        val currentMode = degradationManager.evaluateAndAdjust()
+        val featureConfig = degradationManager.getCurrentConfig()
         
         // Check if device is under memory pressure
         if (deviceCapability.isUnderMemoryPressure()) {
             Log.w(TAG, "Device under memory pressure - enabling degradation mode")
+            degradationManager.recordMemoryWarning()
             emit(AIGenerationResult.Loading(
                 progress = 0.0f,
                 message = "Device resources constrained - optimizing settings..."
             ))
         }
         
-        // Try cache first
-        val cachedResult = checkCache(cacheKey, request.outputMode)
-        if (cachedResult != null) {
-            Log.i(TAG, "Cache hit for request: $cacheKey")
-            emit(cachedResult)
-            return@flow
+        // Show degradation message to user if needed
+        degradationManager.getUserMessage()?.let { message ->
+            emit(AIGenerationResult.Loading(0.0f, message))
         }
         
-        // Determine processing strategy based on output mode
-        val resultFlow = when (request.outputMode) {
-            AIOutputMode.IMAGE_ONLY -> {
-                generateImageOnly(request, cacheKey)
-            }
-            
-            AIOutputMode.TEXT_ONLY -> {
-                generateTextOnly(request, cacheKey)
-            }
-            
-            AIOutputMode.COMBINED -> {
-                generateCombined(request, cacheKey)
+        // Try cache first (if enabled)
+        if (featureConfig.enableCache) {
+            val cachedResult = checkCache(cacheKey, request.outputMode)
+            if (cachedResult != null) {
+                Log.i(TAG, "Cache hit for request: $cacheKey")
+                emit(cachedResult)
+                return@flow
             }
         }
         
-        // Emit all results from the flow
-        resultFlow.collect { result ->
-            emit(result)
-            
-            // Cache successful results
-            if (result is AIGenerationResult.Success) {
-                cacheResult(cacheKey, result)
+        // Determine processing strategy based on output mode and degradation
+        try {
+            val resultFlow = when (request.outputMode) {
+                AIOutputMode.IMAGE_ONLY -> {
+                    generateImageOnly(request, cacheKey, featureConfig)
+                }
+                
+                AIOutputMode.TEXT_ONLY -> {
+                    generateTextOnly(request, cacheKey, featureConfig)
+                }
+                
+                AIOutputMode.COMBINED -> {
+                    if (featureConfig.enableParallelProcessing) {
+                        generateCombined(request, cacheKey, featureConfig)
+                    } else {
+                        // Sequential processing in degraded mode
+                        generateCombinedSequential(request, cacheKey, featureConfig)
+                    }
+                }
             }
+            
+            // Emit all results from the flow
+            resultFlow.collect { result ->
+                emit(result)
+                
+                // Cache successful results (if caching enabled)
+                if (result is AIGenerationResult.Success && featureConfig.enableCache) {
+                    cacheResult(cacheKey, result)
+                }
+                
+                // Record success/failure for degradation tracking
+                when (result) {
+                    is AIGenerationResult.Success -> degradationManager.recordApiSuccess()
+                    is AIGenerationResult.Error -> degradationManager.recordApiFailure(result.message)
+                    else -> {} // Loading states
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Content generation failed", e)
+            degradationManager.recordApiFailure(e.message ?: "Unknown error")
+            throw e
         }
         
         // Log telemetry summary
@@ -112,17 +151,24 @@ class EnhancedAIRepositoryImpl @Inject constructor(
      */
     private fun generateImageOnly(
         request: ImageGenerationRequest,
-        cacheKey: String
+        cacheKey: String,
+        featureConfig: FeatureConfig
     ): Flow<AIGenerationResult> {
         return pipeline.processImageWithProgress { progress ->
             val adjustedTemperature = adjustTemperatureForDevice(request.parameters.creativityLevel)
             
             progress(0.3f, "Generating image...")
-            aiDataSource.generateImage(
+            val rawImage = aiDataSource.generateImage(
                 prompt = request.prompt,
                 bitmaps = request.bitmaps,
                 temperature = adjustedTemperature
             )
+            
+            // Optimize image if generated
+            rawImage?.let { 
+                val optimized = bitmapOptimizer.optimize(it, TargetUse.DISPLAY)
+                optimized.bitmap
+            }
         }
     }
     
@@ -131,7 +177,8 @@ class EnhancedAIRepositoryImpl @Inject constructor(
      */
     private fun generateTextOnly(
         request: ImageGenerationRequest,
-        cacheKey: String
+        cacheKey: String,
+        featureConfig: FeatureConfig
     ): Flow<AIGenerationResult> {
         return pipeline.processTextWithStreaming { chunk ->
             val adjustedTemperature = adjustTemperatureForDevice(request.parameters.creativityLevel)
@@ -149,17 +196,23 @@ class EnhancedAIRepositoryImpl @Inject constructor(
      */
     private fun generateCombined(
         request: ImageGenerationRequest,
-        cacheKey: String
+        cacheKey: String,
+        featureConfig: FeatureConfig
     ): Flow<AIGenerationResult> {
         val adjustedTemperature = adjustTemperatureForDevice(request.parameters.creativityLevel)
         
         return pipeline.processParallel(
             imageOperation = {
-                aiDataSource.generateImage(
+                val rawImage = aiDataSource.generateImage(
                     prompt = request.prompt,
                     bitmaps = request.bitmaps,
                     temperature = adjustedTemperature
                 )
+                // Optimize image
+                rawImage?.let {
+                    val optimized = bitmapOptimizer.optimize(it, TargetUse.DISPLAY)
+                    optimized.bitmap
+                }
             },
             textOperation = {
                 aiDataSource.generateText(
@@ -170,6 +223,46 @@ class EnhancedAIRepositoryImpl @Inject constructor(
             },
             priority = TaskPriority.NORMAL
         )
+    }
+    
+    /**
+     * Generate image and text sequentially (degraded mode)
+     */
+    private fun generateCombinedSequential(
+        request: ImageGenerationRequest,
+        cacheKey: String,
+        featureConfig: FeatureConfig
+    ): Flow<AIGenerationResult> = flow {
+        val adjustedTemperature = adjustTemperatureForDevice(request.parameters.creativityLevel)
+        
+        emit(AIGenerationResult.Loading(0.1f, "Generating (sequential mode)..."))
+        
+        // Generate image first
+        emit(AIGenerationResult.Loading(0.3f, "Generating image..."))
+        val rawImage = aiDataSource.generateImage(
+            prompt = request.prompt,
+            bitmaps = request.bitmaps,
+            temperature = adjustedTemperature
+        )
+        
+        val optimizedImage = rawImage?.let {
+            val optimized = bitmapOptimizer.optimize(it, TargetUse.DISPLAY)
+            optimized.bitmap
+        }
+        
+        // Then generate text
+        emit(AIGenerationResult.Loading(0.6f, "Generating text..."))
+        val text = aiDataSource.generateText(
+            prompt = request.prompt,
+            bitmaps = request.bitmaps,
+            temperature = adjustedTemperature
+        )
+        
+        if (optimizedImage != null || text != null) {
+            emit(AIGenerationResult.Success(image = optimizedImage, text = text))
+        } else {
+            emit(AIGenerationResult.Error("Failed to generate content"))
+        }
     }
     
     /**
@@ -244,6 +337,11 @@ class EnhancedAIRepositoryImpl @Inject constructor(
      * Get device capabilities
      */
     fun getDeviceCapabilities() = capabilities
+    
+    /**
+     * Get degradation status
+     */
+    fun getDegradationStatus() = degradationManager.getCurrentConfig()
     
     /**
      * Clear cache
