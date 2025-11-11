@@ -134,35 +134,92 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 
 ## 🏗️ Architecture
 
+NanoBanana follows **Clean Architecture** principles with **MVVM (Model-View-ViewModel)** pattern, ensuring:
+- Clear separation of concerns
+- Testability at all layers
+- Scalability for future features
+- Maintainability through well-defined boundaries
+
+### Architecture Layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Presentation Layer                    │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  UI (Compose) ◄─► ViewModel ◄─► UiState           │ │
+│  └────────────────────────────────────────────────────┘ │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│                      Domain Layer                        │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  Use Cases ◄─► Models ◄─► Repository Interfaces   │ │
+│  └────────────────────────────────────────────────────┘ │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│                       Data Layer                         │
+│  ┌────────────────────────────────────────────────────┐ │
+│  │  Repositories ◄─► Data Sources (API, Storage)     │ │
+│  └────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────┘
+```
+
 ### Project Structure
 ```
 app/src/main/java/com/yunho/nanobanana/
-├── MainActivity.kt              # Main activity with enhanced UI composition
-├── NanoBanana.kt               # Core business logic and state management
-├── NanoBananaService.kt        # Enhanced AI service with retry logic
+├── presentation/                # Presentation Layer (UI State & ViewModels)
+│   ├── viewmodel/
+│   │   └── MainViewModel.kt    # State management with single StateFlow
+│   └── state/
+│       └── MainUiState.kt      # Immutable UI state data classes
+├── domain/                      # Domain Layer (Business Logic - No Android deps)
+│   ├── model/                   # Domain models and enums
+│   │   ├── ImageGenerationRequest.kt
+│   │   └── AIGenerationResult.kt
+│   ├── usecase/                 # Business logic use cases
+│   │   ├── GenerateAIContentUseCase.kt
+│   │   └── SettingsUseCases.kt
+│   └── repository/              # Repository interfaces
+│       ├── AIRepository.kt
+│       └── SettingsRepository.kt
+├── data/                        # Data Layer (Data Management)
+│   ├── repository/              # Repository implementations
+│   │   ├── AIRepositoryImpl.kt
+│   │   └── SettingsRepositoryImpl.kt
+│   └── datasource/              # Data source implementations
+│       ├── GeminiAIDataSource.kt  # Gemini API integration
+│       └── SettingsDataSource.kt  # SharedPreferences wrapper
+├── di/                          # Dependency Injection
+│   └── AppContainer.kt         # Manual DI container
+├── components/                  # Reusable UI Components
+│   ├── Generate.kt             # Animated generation button
+│   ├── ResultImage.kt          # Image display with gestures
+│   ├── LoadingEffects.kt       # Advanced loading animations
+│   └── ...                     # Other UI components
+├── ai/                          # Legacy AI services (being phased out)
+│   ├── PromptManager.kt
+│   └── EnhancedAIService.kt
 ├── animations/                  # Animation utilities
-│   └── MaterialMotion.kt       # Material Design 3 motion specifications
-├── components/                  # Reusable UI components
-│   ├── ApiKeySetting.kt       # API key configuration UI
-│   ├── Generate.kt            # Animated generation button with haptics
-│   ├── LoadingEffects.kt      # Shimmer, ripple, skeleton, and adaptive blur effects
-│   ├── PickedImages.kt        # Selected images with staggered animations
-│   ├── Prompt.kt              # Text prompt input
-│   ├── ResultImage.kt         # Generated image with zoom gestures and reveal animation
-│   ├── Save.kt                # Animated save button
-│   ├── SelectImages.kt        # Image selection with animations
-│   ├── StylePicker.kt         # Style preset carousel
-│   ├── Reset.kt               # Reset with rotating icon
-│   ├── PickerTitle.kt         # Title component
-│   ├── TextOutput.kt          # Elegant text display with scrolling and selection
-│   └── HapticGestures.kt      # Haptic feedback and gesture utilities
-├── extension/                  # Utility extensions
-│   └── Context.kt             # Context extension functions
-└── ui/theme/                   # Material Design 3 theming
-    ├── Color.kt               # Color palette
-    ├── Theme.kt               # Dynamic theming
-    └── Type.kt                # Typography
+│   └── MaterialMotion.kt       # Material Design 3 motion specs
+├── extension/                   # Kotlin extensions
+│   └── Context.kt
+├── ui/theme/                    # Material Design 3 theming
+│   ├── Color.kt
+│   ├── Theme.kt
+│   └── Type.kt
+└── MainActivity.kt              # App entry point
 ```
+
+### Key Architectural Benefits
+
+1. **Testability**: Each layer can be tested independently with mocks
+2. **Scalability**: Easy to add new features without modifying existing code
+3. **Maintainability**: Clear boundaries make code easier to understand
+4. **Reusability**: Business logic in domain layer is platform-independent
+5. **Flexibility**: Easy to swap implementations (e.g., different AI providers)
 
 ## 🎨 Key Improvements
 
@@ -223,7 +280,64 @@ app/src/main/java/com/yunho/nanobanana/
 - **Kotlinx Serialization**: JSON handling
 - **AndroidX Core KTX**: Kotlin extensions
 
-## 🔧 Build Information
+## 🧪 Testing
+
+### Comprehensive Test Coverage
+
+NanoBanana includes extensive testing at all architectural layers:
+
+#### Unit Tests (app/src/test/)
+- **Domain Layer Tests**: Pure business logic testing
+  - `GenerateAIContentUseCaseTest`: Use case validation
+  - Model validation and business rules
+- **Data Layer Tests**: Repository and data source testing
+  - `AIRepositoryImplTest`: Repository logic verification
+  - Mock-based testing with Mockito
+- **Presentation Layer Tests**: ViewModel state management
+  - `MainViewModelTest`: UI state transitions
+  - Flow testing with Turbine library
+  - Coroutine testing
+
+#### Integration Tests (app/src/androidTest/)
+- Complete feature flow testing
+- AI service integration tests
+- End-to-end user journey validation
+
+#### Test Technologies
+- **JUnit 4**: Test framework
+- **Mockito Kotlin**: Mocking framework
+- **Turbine**: Flow testing library
+- **Coroutines Test**: Async testing utilities
+- **Compose Test**: UI component testing
+
+### Running Tests
+
+```bash
+# Run all unit tests
+./gradlew test
+
+# Run specific test class
+./gradlew test --tests MainViewModelTest
+
+# Run all instrumented tests
+./gradlew connectedAndroidTest
+
+# Generate coverage report
+./gradlew testDebugUnitTestCoverage
+```
+
+### CI/CD Pipeline
+
+Automated testing via GitHub Actions:
+- ✅ Unit tests on every push
+- ✅ Lint checks
+- ✅ Build verification
+- ✅ Instrumented tests on emulator
+- ✅ Code quality checks
+
+See [TESTING.md](TESTING.md) for detailed testing strategies and guidelines.
+
+## 📐 Build Information
 
 - **Compile SDK**: 36
 - **Min SDK**: 28
@@ -235,21 +349,31 @@ app/src/main/java/com/yunho/nanobanana/
 
 ## 📚 Documentation
 
-See these documentation files for detailed information:
-- [MODERNIZATION.md](MODERNIZATION.md) - Complete modernization details
+Comprehensive documentation for developers and contributors:
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed architecture guide
+  - Layer responsibilities and boundaries
+  - Data flow diagrams
+  - Dependency injection setup
+  - Best practices and patterns
+  
+- **[TESTING.md](TESTING.md)**: Complete testing strategy
+  - Unit, integration, and UI testing
+  - Test organization and patterns
+  - CI/CD pipeline configuration
+  - Coverage goals and metrics
+  
+- **[MODERNIZATION.md](MODERNIZATION.md)**: Complete modernization details
   - Animation specifications
   - API integration details
   - Best practices implemented
-  - Testing recommendations
-- [UI_ENHANCEMENTS.md](UI_ENHANCEMENTS.md) - Comprehensive UI/UX enhancements
+  
+- **[UI_ENHANCEMENTS.md](UI_ENHANCEMENTS.md)**: UI/UX enhancements
   - Multi-layered adaptive blur effects
   - Shimmer and ripple animations
-  - Elegant text output presentation
-  - Kotlin Flow & StateFlow integration
   - Haptic feedback and gesture support
-  - Testing scenarios and coverage guidelines
 
-## 🤝 Contributing
+## 📦 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
