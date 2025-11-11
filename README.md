@@ -44,8 +44,14 @@ An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and 
 - **Accessibility First**: Comprehensive accessibility features
   - Full screen reader support with semantic descriptions
   - Adjustable font sizes respecting system settings
-  - WCAG AA compliant contrast ratios
+  - WCAG AA/AAA compliant contrast ratios with automatic verification
+  - Dynamic typography scaling across screen sizes
   - High-contrast display option
+  - Focus navigation with semantic labels
+- **Advanced Gesture Controls**: Intuitive interaction patterns
+  - Swipe-to-undo/redo with haptic feedback
+  - Visual indicators for gesture thresholds
+  - Configurable sensitivity and availability states
 
 ### Creative Transformation Styles
 - **Korean Historical**: Transform to Chosun Dynasty 1900s style
@@ -372,6 +378,12 @@ Comprehensive documentation for developers and contributors:
   - Multi-layered adaptive blur effects
   - Shimmer and ripple animations
   - Haptic feedback and gesture support
+
+- **[ADVANCED_UI_UX_ENHANCEMENTS.md](ADVANCED_UI_UX_ENHANCEMENTS.md)**: Advanced UI/UX features
+  - WCAG AA/AAA accessibility compliance
+  - Dynamic typography and responsive design
+  - Swipe gestures for undo/redo
+  - Enhanced skeleton loaders and transitions
 
 ## 📦 Contributing
 

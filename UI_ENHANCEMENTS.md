@@ -3,6 +3,14 @@
 ## Overview
 This document describes the comprehensive UI/UX enhancements made to the NanoBanana AI Image Editor, focusing on professional polish, responsiveness, and accessibility.
 
+> **Note**: For detailed documentation on the latest advanced features (WCAG compliance, dynamic typography, swipe gestures), see [ADVANCED_UI_UX_ENHANCEMENTS.md](ADVANCED_UI_UX_ENHANCEMENTS.md).
+
+## Quick Links
+- [Enhanced Skeleton Loaders](ADVANCED_UI_UX_ENHANCEMENTS.md#enhanced-skeleton-loaders)
+- [Accessibility & WCAG Compliance](ADVANCED_UI_UX_ENHANCEMENTS.md#accessibility--wcag-compliance)
+- [Dynamic Typography System](ADVANCED_UI_UX_ENHANCEMENTS.md#dynamic-typography-system)
+- [Swipe Gestures for Undo/Redo](ADVANCED_UI_UX_ENHANCEMENTS.md#swipe-gestures-for-undoredo)
+
 ## 1. Multi-Layered Adaptive Blur Effects
 
 ### Implementation
@@ -460,5 +468,17 @@ The enhanced NanoBanana AI Image Editor now features:
 ✅ **Strict Material Design 3** compliance with dynamic theming
 ✅ **Haptic feedback and gestures** for tactile engagement
 ✅ **Comprehensive documentation** and testing guidelines
+
+### NEW: Advanced Features (v2.0)
+
+✅ **Enhanced skeleton loaders** for all major UI regions (prompt input, AI output panels)
+✅ **WCAG AA/AAA compliance** with automatic contrast verification and enhancement
+✅ **Dynamic typography scaling** across 4 screen size breakpoints (Small to XLarge)
+✅ **Swipe-to-undo/redo gestures** with haptic feedback and visual indicators
+✅ **Synchronized state transitions** with Material Motion animations
+✅ **Focus navigation support** with comprehensive semantic labels
+✅ **Expanded test coverage** with 15+ new accessibility and gesture tests
+
+For complete documentation on these advanced features, see **[ADVANCED_UI_UX_ENHANCEMENTS.md](ADVANCED_UI_UX_ENHANCEMENTS.md)**.
 
 All enhancements maintain backward compatibility while providing a cutting-edge, professional user experience.
