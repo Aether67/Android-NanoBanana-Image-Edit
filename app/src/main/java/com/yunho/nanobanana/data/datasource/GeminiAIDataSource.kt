@@ -255,6 +255,96 @@ class GeminiAIDataSource @Inject constructor(
         }
     }
     
+    /**
+     * Enhance image using Gemini 2.5 Flash Image Preview model
+     * Supports both full-image and region-specific enhancement
+     */
+    override suspend fun enhanceImage(
+        image: Bitmap,
+        enhancementType: com.yunho.nanobanana.domain.model.EnhancementType,
+        targetRegion: android.graphics.Rect?,
+        intensity: Float
+    ): Bitmap? {
+        return withContext(Dispatchers.IO) {
+            try {
+                // Crop region if specified
+                val inputImage = if (targetRegion != null) {
+                    try {
+                        Bitmap.createBitmap(
+                            image,
+                            targetRegion.left,
+                            targetRegion.top,
+                            targetRegion.width(),
+                            targetRegion.height()
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to crop image region", e)
+                        image
+                    }
+                } else {
+                    image
+                }
+                
+                // Build enhancement prompt with intensity consideration
+                val intensityModifier = when {
+                    intensity > 0.8f -> "aggressively"
+                    intensity > 0.5f -> "moderately"
+                    else -> "subtly"
+                }
+                
+                val enhancementPrompt = buildEnhancementPrompt(
+                    enhancementType,
+                    intensityModifier,
+                    targetRegion != null
+                )
+                
+                Log.d(TAG, "Enhancing image with type: ${enhancementType.displayName}, intensity: $intensity")
+                
+                // Use lower temperature for enhancement to ensure consistency
+                val enhancedResult = performGenerationWithRetry(
+                    enhancementPrompt,
+                    listOf(inputImage),
+                    temperature = 0.3f, // Low temperature for consistent enhancement
+                    extractImage = true
+                )
+                
+                enhancedResult.first
+            } catch (e: Exception) {
+                Log.e(TAG, "Enhancement failed", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * Builds enhancement-specific prompt
+     */
+    private fun buildEnhancementPrompt(
+        enhancementType: com.yunho.nanobanana.domain.model.EnhancementType,
+        intensityModifier: String,
+        isRegional: Boolean
+    ): String {
+        val basePrompt = enhancementType.prompt
+        val regionalNote = if (isRegional) {
+            " Ensure the enhanced region blends seamlessly with the rest of the image, maintaining color consistency and avoiding visible boundaries."
+        } else {
+            ""
+        }
+        
+        return """
+            $intensityModifier $basePrompt
+            
+            Important guidelines:
+            - Preserve the natural appearance and avoid artificial-looking results
+            - Do not introduce artifacts, halos, or noise
+            - Maintain proper color balance and contrast
+            - Focus on enhancing genuine details rather than inventing new ones
+            $regionalNote
+            
+            Return only the enhanced image without any text explanations.
+        """.trimIndent()
+    }
+    
     companion object {
         private const val TAG = "GeminiAIDataSource"
     }

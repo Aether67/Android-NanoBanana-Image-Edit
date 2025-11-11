@@ -277,9 +277,81 @@ For future scaling, consider:
 6. **Documentation**: KDoc comments for public APIs
 7. **Naming**: Clear, descriptive names following conventions
 
+## AI Integration Architecture
+
+### Dual Data Streams
+
+NanoBanana supports multi-modal AI output with synchronized visual and textual data:
+
+```
+┌─────────────────────────────────────────────────────┐
+│              AI Generation Request                   │
+└────────────────┬────────────────────────────────────┘
+                 │
+      ┌──────────┴──────────┐
+      ↓                     ↓
+Image Stream            Text Stream
+      ↓                     ↓
+Parallel Processing   Parallel Processing
+(Kotlin Coroutines)  (Kotlin Coroutines)
+      ↓                     ↓
+   Cache                 Cache
+      ↓                     ↓
+StateFlow Emission    StateFlow Emission
+      │                     │
+      └──────────┬──────────┘
+                 ↓
+           UI Updates
+    (Image + Text Display)
+```
+
+### AI Service Abstraction
+
+```kotlin
+// Domain layer - defines contract
+interface AIRepository {
+    suspend fun generateImage(request: ImageGenerationRequest): Flow<AIGenerationResult>
+    suspend fun generateText(prompt: String): Flow<String>
+    suspend fun generateCombined(request: ImageGenerationRequest): Flow<CombinedResult>
+}
+
+// Data layer - implements with Gemini API
+class EnhancedAIRepositoryImpl(
+    private val dataSource: GeminiAIDataSource,
+    private val cache: AIContentCache,
+    private val retryHandler: RetryHandler
+) : AIRepository {
+    // Parallel processing, caching, retry logic
+}
+```
+
+### Asynchronous Processing Pipeline
+
+The app uses Kotlin Coroutines for efficient parallel processing:
+
+1. **Task Prioritization**: 5-level priority system ensures UI responsiveness
+2. **Intelligent Caching**: LRU cache with JPEG compression (60-70% memory reduction)
+3. **Exponential Backoff Retry**: Automatic retry with jitter for transient failures
+4. **Device Adaptation**: Quality adjustment based on device tier (HIGH/MID/LOW_END)
+5. **Graceful Degradation**: 4-mode system (NORMAL → REDUCED → MINIMAL → EMERGENCY)
+
+For detailed AI integration documentation, see [AI_INTEGRATION_STRATEGY.md](AI_INTEGRATION_STRATEGY.md).
+
+## Future Architecture Evolution
+
+See [ARCHITECTURAL_REFACTORING_PLAN.md](ARCHITECTURAL_REFACTORING_PLAN.md) for detailed roadmap including:
+- Hilt dependency injection migration
+- Multi-module architecture
+- Database layer with Room
+- MVI pattern enhancement
+- Kotlin Multiplatform support
+
 ## Resources
 
 - [Android Architecture Guide](https://developer.android.com/topic/architecture)
 - [Kotlin Coroutines](https://kotlinlang.org/docs/coroutines-guide.html)
 - [Jetpack Compose](https://developer.android.com/jetpack/compose)
 - [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [AI Integration Strategy](AI_INTEGRATION_STRATEGY.md) - Detailed AI architecture
+- [Architectural Refactoring Plan](ARCHITECTURAL_REFACTORING_PLAN.md) - Future roadmap
+- [Testing Roadmap](TESTING_ROADMAP.md) - Comprehensive testing strategy

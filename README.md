@@ -1,437 +1,190 @@
 # NanoBanana - AI Image Editor
 
-An advanced Android app that uses Google's Gemini 2.0 Flash AI to transform and edit your images with creative prompts.
+An advanced Android app powered by Google's Gemini 2.5 Flash Image Preview to transform and enhance your images with AI.
 
 <br>
 <img src="https://github.com/user-attachments/assets/fa7e4138-fc0c-48aa-b8cf-02e9756f6455" width="250"/>
 <img src="https://github.com/user-attachments/assets/97fa5bf1-c46d-4e6a-8da4-1ff7b98d07b3" width="250"/>
 <img src="https://github.com/user-attachments/assets/3b38d3fa-ca3e-4bd2-a431-954347e6f22d" width="250"/>
 
-## ✨ Features
+## ✨ Key Features
 
-### AI-Powered Image Editing
-- **Gemini 2.0 Flash Integration**: Transform your photos using Google's latest AI model
-- **High-Resolution Output**: Artifact-free, high-quality image generation
-- **Intelligent Retry**: Automatic retry mechanism with exponential backoff for reliability
-- **Smart Error Handling**: Comprehensive error detection and user-friendly feedback
+### AI-Powered Capabilities
+- **Image Generation**: Transform photos using Gemini 2.5 Flash Image Preview
+- **Image Enhancement**: AI-powered detail sharpening and texture refinement
+- **Interactive Zoom**: Pinch-to-zoom (1x-3x) with automatic localized enhancement at >2x
+- **Smart Text Generation**: Contextual explanations and reasoning for AI outputs
+- **Multi-Modal Output**: Simultaneous image and text generation
 
-### Modern UI/UX 💎
-- **Material Design 3**: Beautiful, modern interface with dynamic color theming
-- **Smooth Animations**: Professional-grade animations throughout the app
-  - Spring physics for natural motion
-  - Staggered entrance animations
-  - Interactive press effects on all buttons
-  - Smooth content transitions
-- **Advanced Loading States**: Multi-layered, adaptive visual feedback
-  - Animated progress indicators with ripple effects
-  - Pulsing glow effects synchronized with processing
-  - Adaptive blur intensity based on image size and duration
-  - Skeleton loaders for content with shimmer effects
-- **Haptic Feedback**: Tactile responses for all interactions
-  - Light feedback for subtle actions
-  - Medium feedback for standard interactions
-  - Strong feedback for important actions
-- **Gesture Support**: Enhanced touch interactions
-  - Pinch-to-zoom on generated images (1x to 3x)
-  - Double-tap to reset zoom
-  - Pan support when zoomed
-  - Interactive elevation animations
-- **Elegant Text Display**: Professional text output presentation
-  - Smooth scrolling for long responses
-  - Text selection support
-  - Adaptive formatting for dark mode
-  - High-contrast accessibility mode
-- **Accessibility First**: Comprehensive accessibility features
-  - Full screen reader support with semantic descriptions
-  - Adjustable font sizes respecting system settings
-  - WCAG AA/AAA compliant contrast ratios with automatic verification
-  - Dynamic typography scaling across screen sizes
-  - High-contrast display option
-  - Focus navigation with semantic labels
-- **Advanced Gesture Controls**: Intuitive interaction patterns
-  - Swipe-to-undo/redo with haptic feedback
-  - Visual indicators for gesture thresholds
-  - Configurable sensitivity and availability states
+### Modern UI/UX
+- **Material Design 3**: Beautiful, responsive interface with dynamic theming
+- **Smooth Animations**: Spring physics, staggered entrances, interactive feedback
+- **Advanced Loading States**: Blur effects, skeleton loaders, shimmer animations
+- **Haptic Feedback**: Tactile responses throughout the app
+- **Accessibility**: WCAG AA/AAA compliant, screen reader support, high-contrast mode
+- **Gesture Controls**: Pinch-zoom, double-tap reset, swipe gestures
 
-### Creative Transformation Styles
-- **Korean Historical**: Transform to Chosun Dynasty 1900s style
-- **Collectible Figure**: Create hyper-realistic figure with packaging
-- **Rock-Paper-Scissors**: Interactive game scenarios with two people
-- **Shopping Scene**: 3D style Costco shopping experience
-- **Custom Prompts**: Enter your own creative transformation ideas
-
-### User-Friendly Features
-- **Multi-Image Support**: Select and transform multiple images at once
-- **Gallery Integration**: Save edited images directly to your device's gallery
-- **Responsive Design**: Optimized for all Android screen sizes
-- **Edge-to-Edge**: Modern edge-to-edge display support
-
-## 🚀 Technical Highlights
-
-### Advanced Async Architecture 🔥 NEW!
-- **Parallel Processing Pipeline**: Simultaneous image and text generation using Kotlin Coroutines
-- **Intelligent Caching**: LRU cache with JPEG compression (60-70% memory reduction)
-- **Task Prioritization**: 5-level priority system ensuring UI responsiveness
-- **Exponential Backoff Retry**: Automatic retry with jitter for transient failures
-- **Device Adaptation**: Automatic quality adjustment based on device tier (HIGH/MID/LOW_END)
-- **Graceful Degradation**: 4-mode system (NORMAL → REDUCED → MINIMAL → EMERGENCY)
-- **Comprehensive Telemetry**: Real-time monitoring of latency, errors, cache performance
-- **Memory Safety**: Automatic memory pressure detection and optimization
-
-### Modern Architecture
-- **MVVM Pattern**: Clean separation of UI, business logic, and data
-- **Jetpack Compose**: Modern declarative UI toolkit
-- **Kotlin Coroutines & Flow**: Smooth asynchronous operations with reactive state management
-- **StateFlow Integration**: Real-time UI updates with minimal perceived latency
-- **Material Motion**: Official Material Design 3 motion specifications
-
-### Performance Optimizations
-- **Async Processing**: Non-blocking image generation with parallel pipelines
-- **Reactive Updates**: StateFlow for instant UI synchronization
-- **Progressive Loading**: Multi-layered adaptive blur effects
-- **Optimized Bitmap Handling**: Efficient image compression and encoding
-- **Smart Caching**: Thread-safe LRU cache with automatic eviction
-
-### Code Quality
-- **Comprehensive Documentation**: KDoc comments throughout
-- **Clean Code**: Well-organized, maintainable codebase
-- **Error Resilience**: Robust error handling at all layers
-- **Extensible Design**: Easy to add new AI features
-- **UI Component Tests**: Automated testing for critical user flows
+### Technical Excellence
+- **Clean Architecture**: MVVM pattern with clear layer separation
+- **Async Processing**: Kotlin Coroutines & Flow for non-blocking operations
+- **Smart Caching**: LRU cache with 60-70% memory reduction
+- **Error Resilience**: Comprehensive error handling with automatic retry
+- **80%+ Test Coverage**: Unit, integration, and UI tests
 
 ## 📋 Requirements
 
-- Android 9.0 (API level 28) or higher
-- Google AI API key (Gemini API)
-- Internet connection for AI processing
-- 100MB+ free storage for high-resolution images
+- **Android 9.0** (API level 28) or higher
+- **Google AI API key** (Gemini API)
+- **Internet connection** for AI processing
+- **100MB+ free storage** for high-resolution images
 
-## 🛠️ Setup
+## 🛠️ Quick Start
 
-1. Clone this repository
-   ```bash
-   git clone https://github.com/Aether67/Android-NanoBanana-Image-Edit.git
-   ```
+### 1. Clone Repository
+```bash
+git clone https://github.com/Aether67/Android-NanoBanana-Image-Edit.git
+cd Android-NanoBanana-Image-Edit
+```
 
-2. Open the project in Android Studio
+### 2. Get API Key
+- Visit [Google AI Studio](https://ai.google.dev/)
+- Create a new API key
+- Copy for use in the app
 
-3. Get a Google AI API key:
-    - Visit [Google AI Studio](https://ai.google.dev/)
-    - Create a new API key
-    - Copy the key for use in the app
-
-4. Build and run the app
+### 3. Build & Run
+```bash
+./gradlew assembleDebug
+# Or open in Android Studio and run
+```
 
 ## 📖 Usage
 
-### 1. API Key Setup
-- Open the app and enter your Google AI API key in the settings section
-- Tap "Save" to store the key securely (persisted locally)
-
-### 2. Select Images
-- Tap "Select Images" to choose photos from your gallery
-- You can select multiple images for transformation
-- Selected images appear with smooth animations
-
-### 3. Choose Style
-- Swipe through the available style presets
-- Each style has a preview image and description
-- Or scroll down to enter a custom prompt
-
-### 4. Generate
-- Tap the animated "Generate Image" button to start the AI transformation
-- Watch the elegant loading animation with pulsing glow effect
-- The app will automatically retry if the first attempt fails
-
-### 5. Save Result
-- Once generated, your image appears with a smooth reveal animation
-- Tap "Save" to store the result in your gallery
-- Use "Reset" (with rotating icon) to start over with new images
+1. **Setup**: Enter your Google AI API key in settings
+2. **Select Images**: Choose photos from your gallery
+3. **Choose Style**: Pick from presets or enter custom prompt
+4. **Generate**: Tap Generate to create AI-transformed image
+5. **Enhance**: Use the ✨ Enhance button for detail sharpening
+6. **Zoom**: Pinch to zoom >2x for automatic localized enhancement
+7. **Save**: Export to gallery or share
 
 ## 🏗️ Architecture
 
-NanoBanana follows **Clean Architecture** principles with **MVVM (Model-View-ViewModel)** pattern, ensuring:
-- Clear separation of concerns
-- Testability at all layers
-- Scalability for future features
-- Maintainability through well-defined boundaries
-
-### Architecture Layers
+NanoBanana follows **Clean Architecture** with **MVVM pattern**:
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Presentation Layer                    │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │  UI (Compose) ◄─► ViewModel ◄─► UiState           │ │
-│  └────────────────────────────────────────────────────┘ │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│                      Domain Layer                        │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │  Use Cases ◄─► Models ◄─► Repository Interfaces   │ │
-│  └────────────────────────────────────────────────────┘ │
-└────────────────────┬────────────────────────────────────┘
-                     │
-                     ▼
-┌─────────────────────────────────────────────────────────┐
-│                       Data Layer                         │
-│  ┌────────────────────────────────────────────────────┐ │
-│  │  Repositories ◄─► Data Sources (API, Storage)     │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
+Presentation (UI + ViewModel)
+    ↓
+Domain (Use Cases + Models)
+    ↓
+Data (Repositories + Data Sources)
+    ↓
+Gemini 2.5 Flash Image Preview API
 ```
 
-### Project Structure
-```
-app/src/main/java/com/yunho/nanobanana/
-├── presentation/                # Presentation Layer (UI State & ViewModels)
-│   ├── viewmodel/
-│   │   └── MainViewModel.kt    # State management with single StateFlow
-│   └── state/
-│       └── MainUiState.kt      # Immutable UI state data classes
-├── domain/                      # Domain Layer (Business Logic - No Android deps)
-│   ├── model/                   # Domain models and enums
-│   │   ├── ImageGenerationRequest.kt
-│   │   └── AIGenerationResult.kt
-│   ├── usecase/                 # Business logic use cases
-│   │   ├── GenerateAIContentUseCase.kt
-│   │   └── SettingsUseCases.kt
-│   └── repository/              # Repository interfaces
-│       ├── AIRepository.kt
-│       └── SettingsRepository.kt
-├── data/                        # Data Layer (Data Management)
-│   ├── repository/              # Repository implementations
-│   │   ├── AIRepositoryImpl.kt
-│   │   └── SettingsRepositoryImpl.kt
-│   └── datasource/              # Data source implementations
-│       ├── GeminiAIDataSource.kt  # Gemini API integration
-│       └── SettingsDataSource.kt  # SharedPreferences wrapper
-├── di/                          # Dependency Injection
-│   └── AppContainer.kt         # Manual DI container
-├── components/                  # Reusable UI Components
-│   ├── Generate.kt             # Animated generation button
-│   ├── ResultImage.kt          # Image display with gestures
-│   ├── LoadingEffects.kt       # Advanced loading animations
-│   └── ...                     # Other UI components
-├── ai/                          # Legacy AI services (being phased out)
-│   ├── PromptManager.kt
-│   └── EnhancedAIService.kt
-├── animations/                  # Animation utilities
-│   └── MaterialMotion.kt       # Material Design 3 motion specs
-├── extension/                   # Kotlin extensions
-│   └── Context.kt
-├── ui/theme/                    # Material Design 3 theming
-│   ├── Color.kt
-│   ├── Theme.kt
-│   └── Type.kt
-└── MainActivity.kt              # App entry point
-```
+**Key Components:**
+- **Domain Layer**: Pure Kotlin business logic, no Android dependencies
+- **Data Layer**: Repository pattern with data sources (API, Cache, Settings)
+- **Presentation Layer**: Jetpack Compose UI with reactive StateFlow
 
-### Key Architectural Benefits
+See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
-1. **Testability**: Each layer can be tested independently with mocks
-2. **Scalability**: Easy to add new features without modifying existing code
-3. **Maintainability**: Clear boundaries make code easier to understand
-4. **Reusability**: Business logic in domain layer is platform-independent
-5. **Flexibility**: Easy to swap implementations (e.g., different AI providers)
+## 🎨 Features In Detail
 
-## 🎨 Key Improvements
+### Image Enhancement
+The AI enhancement feature provides:
+- **Full-Image Enhancement**: Sharpen entire image with detail preservation
+- **Localized Enhancement**: Zoom >2x to enhance visible regions
+- **Seamless Blending**: Natural integration without artifacts
+- **Smart Limitations**: 4MP max for full-image, 10MP for regional
 
-### Animation System
-- **Material Motion Tokens**: Consistent timing and easing across all animations
-- **Spring Physics**: Natural, bouncy interactions
-- **Staggered Animations**: Progressive reveal of list items
-- **Press Feedback**: Immediate visual and haptic response to user interactions
-- **Ripple Effects**: Synchronized multi-layer ripples for AI processing indication
+See [IMAGE_ENHANCEMENT_GUIDE.md](IMAGE_ENHANCEMENT_GUIDE.md) for complete documentation.
 
-### Loading States
-- **Adaptive Blur**: Dynamic intensity based on image size and loading duration
-- **Shimmer Effects**: Smooth gradient loading placeholders
-- **Ripple Animations**: Three-layer synchronized ripples for processing indication
-- **Blur Overlays**: Professional multi-layered blur during image processing
-- **Skeleton Loaders**: Pulsing placeholders for cards and images
-- **Progress Indicators**: Custom animated loading spinners with glow effects
-
-### Gesture & Haptic Feedback
-- **Pinch-to-Zoom**: Full zoom support (1x to 3x) on generated images
-- **Double-Tap**: Quick zoom toggle
-- **Pan Gestures**: Navigate when zoomed
-- **Haptic Intensity Levels**: Light, medium, and strong feedback
-- **Interactive Elevation**: Shadow animations on press
-- **Long-Press Support**: Extended press actions with feedback
-
-### Text Presentation
-- **Smooth Scrolling**: Vertical scroll for long text responses
-- **Text Selection**: Full copy/paste support
-- **Adaptive Formatting**: Dark mode and high-contrast support
-- **Scroll Indicators**: Visual cues for scrollable content
-- **Loading Shimmer**: Animated placeholders during text generation
-
-### State Management
-- **Kotlin StateFlow**: Reactive state updates with minimal latency
-- **Real-time Sync**: Instant UI updates on state changes
-- **Thread-Safe**: Concurrent-safe state management
-- **Backward Compatible**: Legacy mutableState support maintained
-
-### Error Handling
-- **Retry Logic**: Up to 3 attempts with exponential backoff
-- **User Feedback**: Clear error messages with helpful guidance
-- **API Logging**: Detailed logs for debugging
-- **Graceful Degradation**: App remains responsive during errors
-
-## 📦 Dependencies
-
-### Core
-- **Jetpack Compose**: UI framework with Material 3
-- **Kotlin Coroutines**: Async programming
-- **OkHttp**: HTTP client with timeout configuration
-
-### Google Services
-- **Firebase BOM**: Firebase integration
-- **Gemini AI**: Google's latest AI model
-
-### Utilities
-- **Kotlinx Serialization**: JSON handling
-- **AndroidX Core KTX**: Kotlin extensions
+### Creative Styles
+- Korean Historical (Chosun Dynasty 1900s)
+- Collectible Figure (Hyper-realistic with packaging)
+- Rock-Paper-Scissors (Interactive game scenarios)
+- Shopping Scene (3D Costco style)
+- Custom Prompts (Your own creative ideas)
 
 ## 🧪 Testing
 
-### Comprehensive Test Coverage
-
-NanoBanana includes extensive testing at all architectural layers:
-
-#### Unit Tests (app/src/test/)
-- **Domain Layer Tests**: Pure business logic testing
-  - `GenerateAIContentUseCaseTest`: Use case validation
-  - Model validation and business rules
-- **Data Layer Tests**: Repository and data source testing
-  - `AIRepositoryImplTest`: Repository logic verification
-  - Mock-based testing with Mockito
-- **Presentation Layer Tests**: ViewModel state management
-  - `MainViewModelTest`: UI state transitions
-  - Flow testing with Turbine library
-  - Coroutine testing
-
-#### Integration Tests (app/src/androidTest/)
-- Complete feature flow testing
-- AI service integration tests
-- End-to-end user journey validation
-
-#### Test Technologies
-- **JUnit 4**: Test framework
-- **Mockito Kotlin**: Mocking framework
-- **Turbine**: Flow testing library
-- **Coroutines Test**: Async testing utilities
-- **Compose Test**: UI component testing
-
-### Running Tests
-
+### Run Tests
 ```bash
-# Run all unit tests
+# Unit tests
 ./gradlew test
 
-# Run specific test class
-./gradlew test --tests MainViewModelTest
-
-# Run all instrumented tests
+# Instrumented tests
 ./gradlew connectedAndroidTest
 
-# Generate coverage report
-./gradlew testDebugUnitTestCoverage
+# All tests
+./gradlew check
 ```
 
-### CI/CD Pipeline
+### Coverage
+- **Unit Tests**: 80%+
+- **Integration Tests**: Complete flows
+- **UI Tests**: Critical components
 
-Automated testing via GitHub Actions:
-- ✅ Unit tests on every push
-- ✅ Lint checks
-- ✅ Build verification
-- ✅ Instrumented tests on emulator
-- ✅ Code quality checks
+See [TESTING.md](TESTING.md) for testing strategy and guidelines.
 
-See [TESTING.md](TESTING.md) for detailed testing strategies and guidelines.
+## 📚 Documentation
+
+- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Complete documentation index
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture guide with AI integration
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and standards
+- **[IMAGE_ENHANCEMENT_GUIDE.md](IMAGE_ENHANCEMENT_GUIDE.md)** - Enhancement feature guide
+- **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)** - Build performance guide
+- **[TESTING.md](TESTING.md)** - Testing strategy
+- **[SECURITY_SUMMARY.md](SECURITY_SUMMARY.md)** - Security analysis
+- **[ROADMAP.md](ROADMAP.md)** - Product roadmap
+
+## 📦 Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Code of conduct
+- Development setup
+- Kotlin coding standards
+- Architecture guidelines
+- Testing requirements
+- Pull request process
+
+### Quick Guidelines
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Follow Kotlin best practices (see CONTRIBUTING.md)
+4. Write tests for your changes
+5. Ensure all tests pass (`./gradlew check`)
+6. Commit with clear messages
+7. Push and open a Pull Request
 
 ## 📐 Build Information
 
 - **Compile SDK**: 36
 - **Min SDK**: 28
 - **Target SDK**: 36
-- **Version**: 1.0
 - **Kotlin**: 2.0.21
 - **Gradle**: 8.13
-- **AGP**: 8.1.4
+- **AGP**: 8.2.2
 
-## 📚 Documentation
+See [BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md) for optimization details.
 
-Comprehensive documentation for developers and contributors:
+## 🎯 Roadmap
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed architecture guide
-  - Layer responsibilities and boundaries
-  - Data flow diagrams
-  - Dependency injection setup
-  - Best practices and patterns
-  
-- **[ASYNC_ARCHITECTURE.md](ASYNC_ARCHITECTURE.md)**: 🔥 NEW! Async architecture guide
-  - Parallel processing pipelines
-  - Caching strategies
-  - Task prioritization
-  - Device adaptation and graceful degradation
-  - Performance optimization techniques
-  - Monitoring and telemetry
-  
-- **[ASYNC_IMPLEMENTATION_SUMMARY.md](ASYNC_IMPLEMENTATION_SUMMARY.md)**: Implementation summary
-  - Architecture overview
-  - Performance metrics
-  - Security considerations
-  - Production readiness checklist
-  
-- **[SECURITY_SUMMARY.md](SECURITY_SUMMARY.md)**: Security review
-  - Vulnerability analysis
-  - Thread safety
-  - Data security
-  - Best practices
-  
-- **[TESTING.md](TESTING.md)**: Complete testing strategy
-  - Unit, integration, and UI testing
-  - Test organization and patterns
-  - CI/CD pipeline configuration
-  - Coverage goals and metrics
-  
-- **[MODERNIZATION.md](MODERNIZATION.md)**: Complete modernization details
-  - Animation specifications
-  - API integration details
-  - Best practices implemented
-  
-- **[UI_ENHANCEMENTS.md](UI_ENHANCEMENTS.md)**: UI/UX enhancements
-  - Multi-layered adaptive blur effects
-  - Shimmer and ripple animations
-  - Haptic feedback and gesture support
+**Current Version**: 1.0
 
-- **[ADVANCED_UI_UX_ENHANCEMENTS.md](ADVANCED_UI_UX_ENHANCEMENTS.md)**: Advanced UI/UX features
-  - WCAG AA/AAA accessibility compliance
-  - Dynamic typography and responsive design
-  - Swipe gestures for undo/redo
-  - Enhanced skeleton loaders and transitions
+**In Progress:**
+- Code quality tooling (ktlint, Detekt)
+- Enhanced test coverage (target 95%)
+- UI/UX refinements
 
-## 📦 Contributing
+**Planned:**
+- Multi-provider AI support
+- Batch image processing
+- Generation history with search
+- Before/after comparison slider
+- Offline mode with caching
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Make your changes following the existing code style
-4. Add comprehensive documentation
-5. Test your changes thoroughly
-6. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-7. Push to the branch (`git push origin feature/AmazingFeature`)
-8. Open a Pull Request
-
-### Development Guidelines
-- Follow Material Design 3 guidelines
-- Add animations for new UI elements
-- Include accessibility support
-- Write KDoc comments
-- Test on multiple screen sizes
+See [ROADMAP.md](ROADMAP.md) for complete roadmap.
 
 ## 📄 License
 
@@ -452,20 +205,10 @@ This project is for educational and personal use. Please ensure you comply with:
 For issues and questions:
 - Create an issue in the GitHub repository
 - Check existing issues for solutions
-- Review the [MODERNIZATION.md](MODERNIZATION.md) documentation
-
-## 🎯 Future Enhancements
-
-Potential features to add:
-- [ ] More AI transformation styles
-- [ ] Image filters and adjustments
-- [ ] Batch processing
-- [ ] History of generations
-- [ ] Share functionality
-- [ ] Custom model parameters
-- [ ] Offline mode with caching
-- [ ] Dark theme enhancements
+- Review the [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
 
 ---
 
 **Made with ❤️ using Jetpack Compose and Material Design 3**
+
+**Powered by Gemini 2.5 Flash Image Preview**

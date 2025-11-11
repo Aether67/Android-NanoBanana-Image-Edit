@@ -6,7 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.yunho.nanobanana.domain.model.AIGenerationResult
 import com.yunho.nanobanana.domain.model.AIOutputMode
 import com.yunho.nanobanana.domain.model.AIParameters
+import com.yunho.nanobanana.domain.model.EnhancementResult
+import com.yunho.nanobanana.domain.model.ImageEnhancementRequest
 import com.yunho.nanobanana.domain.model.ImageGenerationRequest
+import com.yunho.nanobanana.domain.usecase.EnhanceImageUseCase
 import com.yunho.nanobanana.domain.usecase.GenerateAIContentUseCase
 import com.yunho.nanobanana.domain.usecase.ManageAIParametersUseCase
 import com.yunho.nanobanana.domain.usecase.ManageApiKeyUseCase
@@ -29,6 +32,7 @@ import javax.inject.Inject
  */
 class MainViewModel @Inject constructor(
     private val generateContentUseCase: GenerateAIContentUseCase,
+    private val enhanceImageUseCase: EnhanceImageUseCase,
     private val manageApiKeyUseCase: ManageApiKeyUseCase,
     private val manageParametersUseCase: ManageAIParametersUseCase
 ) : ViewModel() {
@@ -207,6 +211,84 @@ class MainViewModel @Inject constructor(
     }
     
     /**
+     * Enhance the currently generated image
+     */
+    fun enhanceImage(targetRegion: android.graphics.Rect? = null) {
+        val currentState = _uiState.value
+        
+        // Get the generated image from current state
+        val imageToEnhance = when (val genState = currentState.generationState) {
+            is GenerationState.Success -> genState.image
+            else -> null
+        }
+        
+        if (imageToEnhance == null) {
+            _uiState.update {
+                it.copy(
+                    enhancementState = EnhancementResult.Error(
+                        "No image available to enhance",
+                        com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
+                    )
+                )
+            }
+            return
+        }
+        
+        // Create enhancement request
+        val enhancementType = if (targetRegion != null) {
+            com.yunho.nanobanana.domain.model.EnhancementType.LOCALIZED_ENHANCE
+        } else {
+            com.yunho.nanobanana.domain.model.EnhancementType.DETAIL_SHARPEN
+        }
+        
+        val request = ImageEnhancementRequest(
+            image = imageToEnhance,
+            enhancementType = enhancementType,
+            targetRegion = targetRegion,
+            intensity = 0.7f
+        )
+        
+        // Use the enhancement use case
+        enhanceImageUseCase(request)
+            .onEach { result ->
+                _uiState.update { state ->
+                    when (result) {
+                        is EnhancementResult.Success -> {
+                            // Update the generated image with enhanced version
+                            state.copy(
+                                generationState = (state.generationState as? GenerationState.Success)?.copy(
+                                    image = result.enhancedImage
+                                ) ?: state.generationState,
+                                enhancementState = result
+                            )
+                        }
+                        else -> state.copy(enhancementState = result)
+                    }
+                }
+            }
+            .catch { e ->
+                _uiState.update {
+                    it.copy(
+                        enhancementState = EnhancementResult.Error(
+                            e.message ?: "Enhancement failed",
+                            com.yunho.nanobanana.domain.model.EnhancementErrorReason.UNKNOWN
+                        )
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+    
+    /**
+     * Clear enhancement state
+     */
+    fun clearEnhancementState() {
+        _uiState.update {
+            it.copy(enhancementState = null)
+        }
+    }
+    
+    /**
      * Reset to idle state
      */
     fun resetToIdle() {
@@ -214,8 +296,108 @@ class MainViewModel @Inject constructor(
             it.copy(
                 generationState = GenerationState.Idle,
                 selectedImages = emptyList(),
-                currentPrompt = ""
+                currentPrompt = "",
+                enhancementState = null
             )
+        }
+    }
+    
+    // ========== Variant Management ==========
+    
+    /**
+     * Save current image as a variant
+     * Creates a new variant from the currently generated or enhanced image
+     */
+    fun saveAsVariant() {
+        val currentState = _uiState.value
+        
+        // Get the current image from generation state
+        val image = when (val genState = currentState.generationState) {
+            is GenerationState.Success -> genState.image
+            else -> null
+        }
+        
+        if (image == null) return
+        
+        // Determine if this is an enhanced version
+        val isEnhanced = currentState.enhancementState is EnhancementResult.Success
+        val enhancementTime = if (isEnhanced) {
+            (currentState.enhancementState as? EnhancementResult.Success)?.processingTimeMs ?: 0
+        } else {
+            0
+        }
+        
+        // Create variant
+        val variant = com.yunho.nanobanana.domain.model.ImageVariant(
+            image = image,
+            prompt = currentState.currentPrompt,
+            isEnhanced = isEnhanced,
+            metadata = com.yunho.nanobanana.domain.model.VariantMetadata(
+                enhancementTimeMs = enhancementTime,
+                style = getStyleName(currentState.selectedStyleIndex),
+                parameters = currentState.aiParameters
+            )
+        )
+        
+        // Add to collection
+        _uiState.update {
+            it.copy(variants = it.variants.addVariant(variant))
+        }
+    }
+    
+    /**
+     * Select a variant by ID
+     */
+    fun selectVariant(id: String) {
+        _uiState.update {
+            it.copy(variants = it.variants.selectVariant(id))
+        }
+        
+        // Optionally, update the generated image to show the selected variant
+        val selectedVariant = _uiState.value.variants.selectedVariant
+        if (selectedVariant != null) {
+            _uiState.update {
+                it.copy(
+                    generationState = GenerationState.Success(
+                        image = selectedVariant.image,
+                        text = null,
+                        reasoning = null
+                    )
+                )
+            }
+        }
+    }
+    
+    /**
+     * Delete a variant by ID
+     */
+    fun deleteVariant(id: String) {
+        _uiState.update {
+            it.copy(variants = it.variants.removeVariant(id))
+        }
+    }
+    
+    /**
+     * Clear all variants
+     */
+    fun clearVariants() {
+        _uiState.update {
+            it.copy(variants = it.variants.clear())
+        }
+    }
+    
+    /**
+     * Get style name from index
+     */
+    private fun getStyleName(index: Int): String {
+        return when (index) {
+            0 -> "Photorealistic"
+            1 -> "Cartoon"
+            2 -> "Anime"
+            3 -> "Watercolor"
+            4 -> "Oil Painting"
+            5 -> "Sketch"
+            else -> "Unknown"
         }
     }
 }

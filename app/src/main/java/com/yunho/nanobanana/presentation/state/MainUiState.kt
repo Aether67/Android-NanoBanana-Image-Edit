@@ -3,6 +3,8 @@ package com.yunho.nanobanana.presentation.state
 import android.graphics.Bitmap
 import com.yunho.nanobanana.domain.model.AIOutputMode
 import com.yunho.nanobanana.domain.model.AIParameters
+import com.yunho.nanobanana.domain.model.EnhancementResult
+import com.yunho.nanobanana.domain.model.VariantCollection
 
 /**
  * UI state for the main screen
@@ -15,7 +17,9 @@ data class MainUiState(
     val selectedStyleIndex: Int = 0,
     val aiParameters: AIParameters = AIParameters(),
     val outputMode: AIOutputMode = AIOutputMode.COMBINED,
-    val generationState: GenerationState = GenerationState.Idle
+    val generationState: GenerationState = GenerationState.Idle,
+    val enhancementState: EnhancementResult? = null,
+    val variants: VariantCollection = VariantCollection()
 )
 
 /**

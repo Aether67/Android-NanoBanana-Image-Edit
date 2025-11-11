@@ -1,8 +1,11 @@
 package com.yunho.nanobanana.data.repository
 
+import android.graphics.Bitmap
+import android.graphics.Rect
 import com.yunho.nanobanana.data.datasource.AIDataSource
 import com.yunho.nanobanana.domain.model.AIGenerationResult
 import com.yunho.nanobanana.domain.model.AIOutputMode
+import com.yunho.nanobanana.domain.model.EnhancementType
 import com.yunho.nanobanana.domain.model.ImageGenerationRequest
 import com.yunho.nanobanana.domain.repository.AIRepository
 import kotlinx.coroutines.Job
@@ -79,6 +82,20 @@ class AIRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             emit(AIGenerationResult.Error("Generation failed: ${e.message}", e))
         }
+    }
+    
+    override suspend fun enhanceImage(
+        image: Bitmap,
+        enhancementType: EnhancementType,
+        targetRegion: Rect?,
+        intensity: Float
+    ): Bitmap? {
+        return aiDataSource.enhanceImage(
+            image = image,
+            enhancementType = enhancementType,
+            targetRegion = targetRegion,
+            intensity = intensity
+        )
     }
     
     override suspend fun cancelGeneration() {
