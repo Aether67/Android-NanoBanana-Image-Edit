@@ -26,11 +26,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.yunho.nanobanana.animations.MotionTokens
+import com.yunho.nanobanana.accessibility.DynamicTypography
+import com.yunho.nanobanana.accessibility.AccessibilityUtils
 
 /**
  * Elegant text output component with smooth scrolling and accessibility
  * Handles long text responses with adaptive formatting for dark mode
  * Supports text selection and high-contrast accessibility
+ * Now includes dynamic typography scaling for responsive text sizing
  */
 @Composable
 fun ElegantTextOutput(
@@ -43,6 +46,12 @@ fun ElegantTextOutput(
     val scrollState = rememberScrollState()
     val isDarkTheme = isSystemInDarkTheme()
     var isVisible by remember { mutableStateOf(false) }
+    
+    // Dynamic typography scaling
+    val scaledTitleSize = DynamicTypography.getScaledTextSize(18.sp)
+    val scaledBodySize = DynamicTypography.getScaledTextSize(16.sp)
+    val scaledLineHeight = DynamicTypography.calculateLineHeight(scaledBodySize)
+    val scaledPadding = DynamicTypography.getScaledSpacing(20.dp)
     
     LaunchedEffect(text) {
         if (text.isNotEmpty()) {
@@ -62,6 +71,15 @@ fun ElegantTextOutput(
         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.95f)
     } else {
         MaterialTheme.colorScheme.onSurface
+    }
+    
+    // Verify color contrast for accessibility
+    val accessibleTextColor = remember(textColor, backgroundColor) {
+        if (AccessibilityUtils.meetsWCAG_AA(textColor, backgroundColor)) {
+            textColor
+        } else {
+            AccessibilityUtils.enhanceContrast(textColor, backgroundColor)
+        }
     }
     
     AnimatedVisibility(
@@ -96,7 +114,7 @@ fun ElegantTextOutput(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(scaledPadding),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Title with icon
@@ -107,7 +125,7 @@ fun ElegantTextOutput(
                 ) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
+                        fontSize = scaledTitleSize,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -150,9 +168,9 @@ fun ElegantTextOutput(
                         ) {
                             Text(
                                 text = text,
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = textColor,
-                                lineHeight = 24.sp,
+                                fontSize = scaledBodySize,
+                                color = accessibleTextColor,
+                                lineHeight = scaledLineHeight,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
                         }

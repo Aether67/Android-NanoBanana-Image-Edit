@@ -4,6 +4,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.aspectRatio
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -402,6 +403,104 @@ fun TextGenerationShimmer(
                         shape = RoundedCornerShape(50)
                     )
             )
+        }
+    }
+}
+
+/**
+ * Skeleton loader for prompt input area with shimmer effect
+ * Provides visual feedback during initialization or loading
+ */
+@Composable
+fun PromptInputSkeleton(
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            ShimmerTextPlaceholder(widthFraction = 0.3f)
+            Spacer(modifier = Modifier.height(8.dp))
+            ShimmerLoadingBox(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Synchronized cross-fade transition between loading and content states
+ * Provides smooth visual continuity during state changes
+ */
+@Composable
+fun SynchronizedTransition(
+    isLoading: Boolean,
+    loadingContent: @Composable () -> Unit,
+    actualContent: @Composable () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.animation.Crossfade(
+        targetState = isLoading,
+        animationSpec = tween(
+            durationMillis = 400,
+            easing = FastOutSlowInEasing
+        ),
+        modifier = modifier,
+        label = "state_transition"
+    ) { loading ->
+        if (loading) {
+            loadingContent()
+        } else {
+            actualContent()
+        }
+    }
+}
+
+/**
+ * Enhanced AI output panel skeleton with shimmer
+ * Shows placeholder for both image and text output regions
+ */
+@Composable
+fun AIOutputPanelSkeleton(
+    modifier: Modifier = Modifier,
+    showImagePlaceholder: Boolean = true,
+    showTextPlaceholder: Boolean = true
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            if (showImagePlaceholder) {
+                ShimmerTextPlaceholder(widthFraction = 0.5f)
+                Spacer(modifier = Modifier.height(8.dp))
+                SkeletonImageCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                )
+            }
+            
+            if (showTextPlaceholder) {
+                ShimmerTextPlaceholder(widthFraction = 0.4f)
+                Spacer(modifier = Modifier.height(4.dp))
+                repeat(4) {
+                    ShimmerTextPlaceholder(
+                        widthFraction = if (it % 2 == 0) 0.95f else 0.8f
+                    )
+                }
+            }
         }
     }
 }
