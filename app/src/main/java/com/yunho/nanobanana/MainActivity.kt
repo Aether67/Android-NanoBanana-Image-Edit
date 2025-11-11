@@ -89,6 +89,9 @@ fun MainApp(
         onGenerateClick = { viewModel.generateContent(uiState.currentPrompt) },
         onEnhanceClick = { viewModel.enhanceImage() },
         onZoomEnhance = { region -> viewModel.enhanceImage(region) },
+        onSaveAsVariant = viewModel::saveAsVariant,
+        onVariantSelect = viewModel::selectVariant,
+        onVariantDelete = viewModel::deleteVariant,
         onReset = viewModel::resetToIdle,
         modifier = modifier
     )

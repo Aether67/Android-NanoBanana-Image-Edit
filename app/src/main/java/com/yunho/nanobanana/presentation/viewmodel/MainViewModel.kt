@@ -301,4 +301,103 @@ class MainViewModel @Inject constructor(
             )
         }
     }
+    
+    // ========== Variant Management ==========
+    
+    /**
+     * Save current image as a variant
+     * Creates a new variant from the currently generated or enhanced image
+     */
+    fun saveAsVariant() {
+        val currentState = _uiState.value
+        
+        // Get the current image from generation state
+        val image = when (val genState = currentState.generationState) {
+            is GenerationState.Success -> genState.image
+            else -> null
+        }
+        
+        if (image == null) return
+        
+        // Determine if this is an enhanced version
+        val isEnhanced = currentState.enhancementState is EnhancementResult.Success
+        val enhancementTime = if (isEnhanced) {
+            (currentState.enhancementState as? EnhancementResult.Success)?.processingTimeMs ?: 0
+        } else {
+            0
+        }
+        
+        // Create variant
+        val variant = com.yunho.nanobanana.domain.model.ImageVariant(
+            image = image,
+            prompt = currentState.currentPrompt,
+            isEnhanced = isEnhanced,
+            metadata = com.yunho.nanobanana.domain.model.VariantMetadata(
+                enhancementTimeMs = enhancementTime,
+                style = getStyleName(currentState.selectedStyleIndex),
+                parameters = currentState.aiParameters
+            )
+        )
+        
+        // Add to collection
+        _uiState.update {
+            it.copy(variants = it.variants.addVariant(variant))
+        }
+    }
+    
+    /**
+     * Select a variant by ID
+     */
+    fun selectVariant(id: String) {
+        _uiState.update {
+            it.copy(variants = it.variants.selectVariant(id))
+        }
+        
+        // Optionally, update the generated image to show the selected variant
+        val selectedVariant = _uiState.value.variants.selectedVariant
+        if (selectedVariant != null) {
+            _uiState.update {
+                it.copy(
+                    generationState = GenerationState.Success(
+                        image = selectedVariant.image,
+                        text = null,
+                        reasoning = null
+                    )
+                )
+            }
+        }
+    }
+    
+    /**
+     * Delete a variant by ID
+     */
+    fun deleteVariant(id: String) {
+        _uiState.update {
+            it.copy(variants = it.variants.removeVariant(id))
+        }
+    }
+    
+    /**
+     * Clear all variants
+     */
+    fun clearVariants() {
+        _uiState.update {
+            it.copy(variants = it.variants.clear())
+        }
+    }
+    
+    /**
+     * Get style name from index
+     */
+    private fun getStyleName(index: Int): String {
+        return when (index) {
+            0 -> "Photorealistic"
+            1 -> "Cartoon"
+            2 -> "Anime"
+            3 -> "Watercolor"
+            4 -> "Oil Painting"
+            5 -> "Sketch"
+            else -> "Unknown"
+        }
+    }
 }

@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 /**
  * Main screen for NanoBanana AI Image Editor
  * Follows Clean Architecture with MVVM pattern
- * Integrates AI image generation, enhancement, and text generation
+ * Integrates AI image generation, enhancement, variant management, and text generation
  */
 @Composable
 fun MainScreen(
@@ -39,6 +39,9 @@ fun MainScreen(
     onGenerateClick: () -> Unit,
     onEnhanceClick: () -> Unit,
     onZoomEnhance: (Rect?) -> Unit,
+    onSaveAsVariant: () -> Unit,
+    onVariantSelect: (String) -> Unit,
+    onVariantDelete: (String) -> Unit,
     onReset: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -83,13 +86,20 @@ fun MainScreen(
             is GenerationState.Success -> {
                 ResultContent(
                     state = state,
+                    variants = uiState.variants,
                     enhancementState = uiState.enhancementState,
                     onEnhanceClick = onEnhanceClick,
                     onZoomEnhance = onZoomEnhance,
+                    onSaveAsVariant = onSaveAsVariant,
+                    onVariantSelect = onVariantSelect,
+                    onVariantDelete = onVariantDelete,
                     onSave = { bitmap ->
                         scope.launch {
                             context.saveBitmapToGallery(bitmap)
                         }
+                    },
+                    onReset = onReset
+                )
                     },
                     onReset = onReset
                 )
@@ -172,9 +182,13 @@ private fun LoadingContent(state: GenerationState.Loading) {
 @Composable
 private fun ResultContent(
     state: GenerationState.Success,
+    variants: com.yunho.nanobanana.domain.model.VariantCollection,
     enhancementState: EnhancementResult?,
     onEnhanceClick: () -> Unit,
     onZoomEnhance: (Rect?) -> Unit,
+    onSaveAsVariant: () -> Unit,
+    onVariantSelect: (String) -> Unit,
+    onVariantDelete: (String) -> Unit,
     onSave: (Bitmap) -> Unit,
     onReset: () -> Unit
 ) {
@@ -183,6 +197,17 @@ private fun ResultContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
     ) {
+        // Variant comparison (if variants exist)
+        if (variants.variants.isNotEmpty()) {
+            VariantComparison(
+                variants = variants.variants,
+                selectedVariantId = variants.selectedVariantId,
+                onVariantSelect = onVariantSelect,
+                onVariantDelete = onVariantDelete,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        
         // Show enhanced or original image with zoom capabilities
         state.image?.let { image ->
             EnhancedResultImage(
@@ -195,11 +220,22 @@ private fun ResultContent(
         
         // Show enhance button if we have an image
         if (state.image != null) {
-            EnhanceButton(
-                enabled = true,
-                enhancementState = enhancementState,
-                onEnhanceClick = onEnhanceClick
-            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                EnhanceButton(
+                    enabled = true,
+                    enhancementState = enhancementState,
+                    onEnhanceClick = onEnhanceClick
+                )
+                
+                // Save as variant button
+                androidx.compose.material3.Button(
+                    onClick = onSaveAsVariant
+                ) {
+                    Text("💾 Save Variant")
+                }
+            }
         }
         
         // Show text output if available
