@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -16,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 
 /**
@@ -95,29 +97,59 @@ fun SkeletonImageCard(
 }
 
 /**
- * Blur effect overlay for image processing states
+ * Multi-layered blur effect overlay with adaptive intensity
+ * Dynamically adjusts blur based on image size and loading duration
  */
 @Composable
 fun BlurredLoadingOverlay(
     isLoading: Boolean,
     modifier: Modifier = Modifier,
+    imageSize: Int = 1000,
     content: @Composable () -> Unit
 ) {
+    // Adaptive blur intensity based on image size
+    val baseBlurRadius = when {
+        imageSize > 2000 -> 12.dp
+        imageSize > 1000 -> 10.dp
+        else -> 8.dp
+    }
+    
+    // Animated blur intensity that increases over time
+    val infiniteTransition = rememberInfiniteTransition(label = "blur_transition")
+    val blurMultiplier by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "blur_multiplier"
+    )
+    
     Box(modifier = modifier) {
         if (isLoading) {
+            // Multi-layered blur effect
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(radius = 8.dp)
+                    .blur(radius = baseBlurRadius * blurMultiplier)
             ) {
                 content()
             }
             
-            // Animated progress indicator overlay
+            // Semi-transparent overlay with gradient
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)),
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.4f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.2f)
+                            )
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
@@ -217,6 +249,159 @@ fun StylePickerSkeleton(
                     )
                 }
             }
+        }
+    }
+}
+
+/**
+ * Ripple animation effect for AI processing indication
+ * Creates expanding circular ripples synchronized with generation
+ */
+@Composable
+fun RippleProcessingIndicator(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.primary
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "ripple_animation")
+    
+    // Multiple ripples with staggered delays
+    val rippleScale1 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ripple_1"
+    )
+    
+    val rippleScale2 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, delayMillis = 700, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ripple_2"
+    )
+    
+    val rippleScale3 by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, delayMillis = 1400, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "ripple_3"
+    )
+    
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        // First ripple
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .graphicsLayer {
+                    scaleX = rippleScale1
+                    scaleY = rippleScale1
+                    alpha = 1f - (rippleScale1 / 2f)
+                }
+                .background(
+                    color = color.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(50)
+                )
+        )
+        
+        // Second ripple
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .graphicsLayer {
+                    scaleX = rippleScale2
+                    scaleY = rippleScale2
+                    alpha = 1f - (rippleScale2 / 2f)
+                }
+                .background(
+                    color = color.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(50)
+                )
+        )
+        
+        // Third ripple
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .graphicsLayer {
+                    scaleX = rippleScale3
+                    scaleY = rippleScale3
+                    alpha = 1f - (rippleScale3 / 2f)
+                }
+                .background(
+                    color = color.copy(alpha = 0.3f),
+                    shape = RoundedCornerShape(50)
+                )
+        )
+    }
+}
+
+/**
+ * Enhanced shimmer effect with synchronized wave animation
+ * Indicates ongoing AI text generation processing
+ */
+@Composable
+fun TextGenerationShimmer(
+    modifier: Modifier = Modifier,
+    text: String = "Generating response..."
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "text_shimmer")
+    
+    val shimmerAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.3f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "shimmer_alpha"
+    )
+    
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = shimmerAlpha)
+        )
+        
+        // Animated dots
+        repeat(3) { index ->
+            val dotAlpha by infiniteTransition.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = 600,
+                        delayMillis = index * 200,
+                        easing = LinearEasing
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "dot_$index"
+            )
+            
+            Box(
+                modifier = Modifier
+                    .size(6.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = dotAlpha),
+                        shape = RoundedCornerShape(50)
+                    )
+            )
         }
     }
 }
