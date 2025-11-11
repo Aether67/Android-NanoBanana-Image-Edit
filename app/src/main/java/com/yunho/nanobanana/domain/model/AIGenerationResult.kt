@@ -35,6 +35,7 @@ sealed class AIGenerationResult {
      */
     data class Loading(
         val progress: Float = 0f,
-        val message: String = "Generating..."
+        val message: String = "Generating...",
+        val reasoning: String? = null
     ) : AIGenerationResult()
 }

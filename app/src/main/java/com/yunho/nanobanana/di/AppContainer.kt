@@ -5,6 +5,7 @@ import com.yunho.nanobanana.data.datasource.AIDataSource
 import com.yunho.nanobanana.data.datasource.GeminiAIDataSource
 import com.yunho.nanobanana.data.datasource.SettingsDataSource
 import com.yunho.nanobanana.data.repository.AIRepositoryImpl
+import com.yunho.nanobanana.data.repository.EnhancedAIRepositoryImpl
 import com.yunho.nanobanana.data.repository.SettingsRepositoryImpl
 import com.yunho.nanobanana.domain.repository.AIRepository
 import com.yunho.nanobanana.domain.repository.SettingsRepository
@@ -42,7 +43,8 @@ class AppContainer(private val context: Context) {
     }
     
     private val aiRepository: AIRepository by lazy {
-        AIRepositoryImpl(createAIDataSource())
+        // Use enhanced repository with async architecture
+        EnhancedAIRepositoryImpl(createAIDataSource(), context)
     }
     
     // Use cases
