@@ -1,214 +1,183 @@
 # NanoBanana - AI Image Editor
 
-An advanced Android app powered by Google's Gemini 2.5 Flash Image Preview to transform and enhance your images with AI.
+A modern Flutter app powered by Google's Gemini AI to transform and enhance your images with professional-grade UI and performance.
 
-<br>
-<img src="https://github.com/user-attachments/assets/fa7e4138-fc0c-48aa-b8cf-02e9756f6455" width="250"/>
-<img src="https://github.com/user-attachments/assets/97fa5bf1-c46d-4e6a-8da4-1ff7b98d07b3" width="250"/>
-<img src="https://github.com/user-attachments/assets/3b38d3fa-ca3e-4bd2-a431-954347e6f22d" width="250"/>
+## ✨ Features
 
-## ✨ Key Features
+### Core Features
+- **AI Image Generation**: Transform photos using Gemini 2.0 Flash AI
+- **Image Enhancement**: AI-powered detail sharpening and quality improvement
+- **Multi-image Support**: Select and process multiple images simultaneously
+- **Creative Styles**: 5 preset styles (Photorealistic, Artistic, Anime, Sci-Fi, Custom)
+- **Cross-platform**: Single codebase for iOS and Android
 
-### AI-Powered Capabilities
-- **Image Generation**: Transform photos using Gemini 2.5 Flash Image Preview
-- **Image Enhancement**: AI-powered detail sharpening and texture refinement
-- **Interactive Zoom**: Pinch-to-zoom (1x-3x) with automatic localized enhancement at >2x
-- **Smart Text Generation**: Contextual explanations and reasoning for AI outputs
-- **Multi-Modal Output**: Simultaneous image and text generation
+### UI & Design
+- **Dark Minimalist Theme**: OLED-optimized pure black design with cyan accents
+- **Smooth Animations**: 60+ FPS with staggered entrance effects
+- **High Refresh Rate**: 90Hz/120Hz support on compatible devices
+- **Material Design 3**: Modern, responsive, and accessible interface
+- **Blur Effects**: Beautiful backdrop blur during image generation
+- **Progress Indicators**: Real-time feedback with progress messages
 
-### Modern UI/UX
-- **Material Design 3**: Beautiful, responsive interface with dynamic theming
-- **Smooth Animations**: Spring physics, staggered entrances, interactive feedback
-- **Advanced Loading States**: Blur effects, skeleton loaders, shimmer animations
-- **Haptic Feedback**: Tactile responses throughout the app
-- **Accessibility**: WCAG AA/AAA compliant, screen reader support, high-contrast mode
-- **Gesture Controls**: Pinch-zoom, double-tap reset, swipe gestures
+### Advanced Features (Beta)
+- **Advanced AI Parameters**: Fine-tune creativity, detail, and reasoning depth
+- **Batch Processing**: Process multiple images at once (coming soon)
+- **Image History**: Track generated images (coming soon)
+- **Variant Comparison**: Compare variants side-by-side (coming soon)
 
-### Technical Excellence
-- **Clean Architecture**: MVVM pattern with clear layer separation
-- **Async Processing**: Kotlin Coroutines & Flow for non-blocking operations
-- **Smart Caching**: LRU cache with 60-70% memory reduction
-- **Error Resilience**: Comprehensive error handling with automatic retry
-- **80%+ Test Coverage**: Unit, integration, and UI tests
+## 📱 Requirements
 
-## 📋 Requirements
+- Flutter SDK 3.0.0+
+- Android 5.0+ (API 21+) / iOS 12.0+
+- Google AI API key ([Get one free](https://ai.google.dev/))
+- Internet connection for AI processing
 
-- **Android 9.0** (API level 28) or higher
-- **Google AI API key** (Gemini API)
-- **Internet connection** for AI processing
-- **100MB+ free storage** for high-resolution images
+## 🚀 Quick Start
 
-## 🛠️ Quick Start
-
-### 1. Clone Repository
 ```bash
+# Clone repository
 git clone https://github.com/Aether67/Android-NanoBanana-Image-Edit.git
 cd Android-NanoBanana-Image-Edit
-```
 
-### 2. Get API Key
-- Visit [Google AI Studio](https://ai.google.dev/)
-- Create a new API key
-- Copy for use in the app
+# Install dependencies
+flutter pub get
 
-### 3. Build & Run
-```bash
-./gradlew assembleDebug
-# Or open in Android Studio and run
+# Run the app
+flutter run
 ```
 
 ## 📖 Usage
 
-1. **Setup**: Enter your Google AI API key in settings
-2. **Select Images**: Choose photos from your gallery
-3. **Choose Style**: Pick from presets or enter custom prompt
-4. **Generate**: Tap Generate to create AI-transformed image
-5. **Enhance**: Use the ✨ Enhance button for detail sharpening
-6. **Zoom**: Pinch to zoom >2x for automatic localized enhancement
-7. **Save**: Export to gallery or share
+1. **Launch** the app - Opens with dark minimalist interface
+2. **Configure API Key** - Enter your Google AI API key (one-time setup)
+3. **Select Images** - Choose one or more images from your gallery
+4. **Pick Style** - Select a creative style or use custom prompt
+5. **Generate** - Tap Generate to transform images with AI
+6. **Enhance** - Use Enhance button for additional quality improvement
+7. **Save** - Save generated variants to your collection
 
-## 🏗️ Architecture
+### Beta Features
+Access experimental features in Settings → Beta Features:
+- Toggle **Advanced AI Parameters** for fine-tuned control
+- Adjust creativity, detail level, and reasoning depth in real-time
 
-NanoBanana follows **Clean Architecture** with **MVVM pattern**:
+## 🏗️ Build
 
-```
-Presentation (UI + ViewModel)
-    ↓
-Domain (Use Cases + Models)
-    ↓
-Data (Repositories + Data Sources)
-    ↓
-Gemini 2.5 Flash Image Preview API
-```
-
-**Key Components:**
-- **Domain Layer**: Pure Kotlin business logic, no Android dependencies
-- **Data Layer**: Repository pattern with data sources (API, Cache, Settings)
-- **Presentation Layer**: Jetpack Compose UI with reactive StateFlow
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
-
-## 🎨 Features In Detail
-
-### Image Enhancement
-The AI enhancement feature provides:
-- **Full-Image Enhancement**: Sharpen entire image with detail preservation
-- **Localized Enhancement**: Zoom >2x to enhance visible regions
-- **Seamless Blending**: Natural integration without artifacts
-- **Smart Limitations**: 4MP max for full-image, 10MP for regional
-
-See [IMAGE_ENHANCEMENT_GUIDE.md](IMAGE_ENHANCEMENT_GUIDE.md) for complete documentation.
-
-### Creative Styles
-- Korean Historical (Chosun Dynasty 1900s)
-- Collectible Figure (Hyper-realistic with packaging)
-- Rock-Paper-Scissors (Interactive game scenarios)
-- Shopping Scene (3D Costco style)
-- Custom Prompts (Your own creative ideas)
-
-## 🧪 Testing
-
-### Run Tests
+### Android
 ```bash
-# Unit tests
-./gradlew test
+# Debug build
+flutter build apk --debug
 
-# Instrumented tests
-./gradlew connectedAndroidTest
+# Release build
+flutter build apk --release
 
-# All tests
-./gradlew check
+# App Bundle for Play Store
+flutter build appbundle --release
 ```
 
-### Coverage
-- **Unit Tests**: 80%+
-- **Integration Tests**: Complete flows
-- **UI Tests**: Critical components
+### iOS
+```bash
+# Build for device
+flutter build ios --release
 
-See [TESTING.md](TESTING.md) for testing strategy and guidelines.
+# Create archive
+flutter build ipa
+```
 
-## 📚 Documentation
+## 🎨 Architecture
 
-- **[DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)** - Complete documentation index
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture guide with AI integration
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines and standards
-- **[IMAGE_ENHANCEMENT_GUIDE.md](IMAGE_ENHANCEMENT_GUIDE.md)** - Enhancement feature guide
-- **[BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md)** - Build performance guide
-- **[TESTING.md](TESTING.md)** - Testing strategy
-- **[SECURITY_SUMMARY.md](SECURITY_SUMMARY.md)** - Security analysis
-- **[ROADMAP.md](ROADMAP.md)** - Product roadmap
+### State Management
+- **Provider** pattern with ChangeNotifier
+- Reactive UI updates with Consumer widgets
+- Centralized state in AppProvider
 
-## 📦 Contributing
+### Layers
+- **Presentation**: Screens and reusable widgets
+- **Business Logic**: Providers and services
+- **Data**: Models and API integration
 
-We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Code of conduct
-- Development setup
-- Kotlin coding standards
-- Architecture guidelines
-- Testing requirements
-- Pull request process
+### Key Technologies
+- `provider ^6.1.1` - State management
+- `google_generative_ai ^0.2.2` - Gemini AI integration
+- `image_picker ^1.0.7` - Image selection
+- `image ^4.1.7` - Image processing
+- `shared_preferences ^2.2.2` - Local storage
 
-### Quick Guidelines
+## 🎯 Performance
+
+- **High Refresh Rate**: 90Hz/120Hz support enabled
+- **Optimized Animations**: Smooth 60+ FPS throughout
+- **Efficient Rendering**: Minimalist design reduces GPU overhead
+- **Smart Caching**: Reuses image data to reduce memory usage
+- **Lazy Loading**: Widgets built on-demand
+
+## 🔒 Security
+
+- API keys stored securely in SharedPreferences
+- No hardcoded credentials
+- Input validation on all user inputs
+- Error messages don't expose sensitive data
+- Network requests with timeout protection
+
+## 📁 Project Structure
+
+```
+lib/
+├── main.dart                 # App entry point
+├── models/                   # Data models
+│   ├── ai_generation_result.dart
+│   ├── ai_parameters.dart
+│   ├── image_variant.dart
+│   └── main_ui_state.dart
+├── providers/                # State management
+│   └── app_provider.dart
+├── screens/                  # UI screens
+│   ├── main_screen.dart
+│   └── settings_screen.dart
+├── services/                 # Business logic
+│   ├── gemini_ai_service.dart
+│   └── settings_service.dart
+├── utils/                    # Utilities
+│   ├── constants.dart
+│   └── theme.dart
+└── widgets/                  # Reusable components
+    ├── action_buttons.dart
+    ├── advanced_ai_parameters.dart
+    ├── api_key_dialog.dart
+    ├── generation_display.dart
+    ├── image_picker_section.dart
+    ├── prompt_input_section.dart
+    └── style_picker_section.dart
+```
+
+## 🤝 Contributing
+
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Follow Kotlin best practices (see CONTRIBUTING.md)
-4. Write tests for your changes
-5. Ensure all tests pass (`./gradlew check`)
-6. Commit with clear messages
-7. Push and open a Pull Request
-
-## 📐 Build Information
-
-- **Compile SDK**: 36
-- **Min SDK**: 28
-- **Target SDK**: 36
-- **Kotlin**: 2.0.21
-- **Gradle**: 8.13
-- **AGP**: 8.2.2
-
-See [BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md) for optimization details.
-
-## 🎯 Roadmap
-
-**Current Version**: 1.0
-
-**In Progress:**
-- Code quality tooling (ktlint, Detekt)
-- Enhanced test coverage (target 95%)
-- UI/UX refinements
-
-**Planned:**
-- Multi-provider AI support
-- Batch image processing
-- Generation history with search
-- Before/after comparison slider
-- Offline mode with caching
-
-See [ROADMAP.md](ROADMAP.md) for complete roadmap.
+3. Commit changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open Pull Request
 
 ## 📄 License
 
-This project is for educational and personal use. Please ensure you comply with:
-- Google's AI API terms of service
-- Material Design usage guidelines
-- Android development best practices
+For educational and personal use. Please comply with:
+- Google's Gemini AI API [Terms of Service](https://ai.google.dev/terms)
+- Flutter's [License](https://github.com/flutter/flutter/blob/master/LICENSE)
+
+## 🐛 Issues & Support
+
+- **Bug Reports**: [Create an issue](https://github.com/Aether67/Android-NanoBanana-Image-Edit/issues)
+- **Feature Requests**: Open a discussion
+- **Questions**: Check existing issues or create new one
 
 ## 🙏 Acknowledgments
 
-- Google for the Gemini AI API
-- Material Design team for the design system
-- Android team for Jetpack Compose
-- Open source community
-
-## 📞 Support
-
-For issues and questions:
-- Create an issue in the GitHub repository
-- Check existing issues for solutions
-- Review the [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
+- Google Gemini AI for powerful image generation
+- Flutter team for excellent framework
+- Material Design 3 for modern design system
 
 ---
 
-**Made with ❤️ using Jetpack Compose and Material Design 3**
+**Built with ❤️ using Flutter & Gemini AI**
 
-**Powered by Gemini 2.5 Flash Image Preview**
+*Cross-platform • Modern • Fast • Accessible*
