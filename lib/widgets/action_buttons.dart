@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ActionButtons extends StatelessWidget {
+class ActionButtons extends StatefulWidget {
   final bool canGenerate;
   final bool isGenerating;
   final VoidCallback onGenerate;
@@ -17,33 +17,131 @@ class ActionButtons extends StatelessWidget {
   });
 
   @override
+  State<ActionButtons> createState() => _ActionButtonsState();
+}
+
+class _ActionButtonsState extends State<ActionButtons>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: ElevatedButton.icon(
-            onPressed: canGenerate && !isGenerating ? onGenerate : null,
-            icon: isGenerating
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.auto_awesome),
-            label: Text(isGenerating ? 'Generating...' : 'Generate'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-            ),
+          flex: 3,
+          child: AnimatedBuilder(
+            animation: _pulseAnimation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: widget.canGenerate && !widget.isGenerating
+                    ? _pulseAnimation.value
+                    : 1.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: widget.canGenerate && !widget.isGenerating
+                        ? [
+                            BoxShadow(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3 * _pulseAnimation.value),
+                              blurRadius: 12 * _pulseAnimation.value,
+                              spreadRadius: 2 * (_pulseAnimation.value - 1),
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed:
+                        widget.canGenerate && !widget.isGenerating ? widget.onGenerate : null,
+                    icon: widget.isGenerating
+                        ? SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          )
+                        : const Icon(Icons.auto_awesome_rounded, size: 22),
+                    label: Text(
+                      widget.isGenerating ? 'Generating...' : 'Generate',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      elevation: widget.canGenerate ? 4 : 0,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: ElevatedButton.icon(
-            onPressed: canEnhance && !isGenerating ? onEnhance : null,
-            icon: const Icon(Icons.auto_fix_high),
-            label: const Text('Enhance'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+          flex: 2,
+          child: AnimatedScale(
+            scale: widget.canEnhance && !widget.isGenerating ? 1.0 : 0.95,
+            duration: const Duration(milliseconds: 200),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: widget.canEnhance && !widget.isGenerating
+                    ? [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .secondary
+                              .withOpacity(0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : [],
+              ),
+              child: ElevatedButton.icon(
+                onPressed:
+                    widget.canEnhance && !widget.isGenerating ? widget.onEnhance : null,
+                icon: const Icon(Icons.auto_fix_high_rounded, size: 20),
+                label: const Text(
+                  'Enhance',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  elevation: widget.canEnhance ? 3 : 0,
+                ),
+              ),
             ),
           ),
         ),
