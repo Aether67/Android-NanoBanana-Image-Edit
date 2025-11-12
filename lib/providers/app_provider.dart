@@ -69,6 +69,12 @@ class AppProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+  
+  /// Update AI parameters
+  void updateAIParameters(AIParameters parameters) {
+    _state = _state.copyWith(aiParameters: parameters);
+    notifyListeners();
+  }
 
   /// Pick images from gallery
   Future<void> pickImages() async {

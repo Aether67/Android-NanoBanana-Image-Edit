@@ -8,6 +8,7 @@ import '../widgets/style_picker_section.dart';
 import '../widgets/prompt_input_section.dart';
 import '../widgets/generation_display.dart';
 import '../widgets/action_buttons.dart';
+import '../widgets/advanced_ai_parameters.dart';
 import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -114,9 +115,20 @@ class _MainScreenState extends State<MainScreen>
                     enabled: state.selectedStyleIndex == 4,
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
+                // Advanced AI Parameters (Beta Feature)
+                if (provider.getBetaFeature('beta_advanced_params'))
+                  _buildSection(
+                    index: 3,
+                    child: AdvancedAIParametersWidget(
+                      parameters: state.aiParameters,
+                      onParametersChanged: provider.updateAIParameters,
+                    ),
+                  ),
+                if (provider.getBetaFeature('beta_advanced_params'))
+                  const SizedBox(height: 12),
                 _buildSection(
-                  index: 3,
+                  index: provider.getBetaFeature('beta_advanced_params') ? 4 : 3,
                   child: ActionButtons(
                     canGenerate: state.selectedImages.isNotEmpty &&
                         state.currentPrompt.isNotEmpty &&
