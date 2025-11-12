@@ -61,50 +61,35 @@ class _StylePickerSectionState extends State<StylePickerSection> {
     final isSelected = widget.selectedIndex == index;
 
     return AnimatedScale(
-      scale: isSelected ? 1.05 : 1.0,
+      scale: isSelected ? 1.0 : 1.0,
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeOutCubic,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color:
-                        Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                    blurRadius: 8,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [],
-        ),
-        child: ChoiceChip(
-          label: Text(
-            CreativeStyles.styles[index],
-            style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
+      child: ChoiceChip(
+        label: Text(
+          CreativeStyles.styles[index],
+          style: TextStyle(
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 13,
           ),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) {
-              widget.onStyleSelected(index);
-            }
-          },
-          selectedColor: Theme.of(context).colorScheme.primaryContainer,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          side: BorderSide(
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.outline.withOpacity(0.3),
-            width: isSelected ? 2 : 1,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          elevation: isSelected ? 3 : 0,
-          pressElevation: 2,
         ),
+        selected: isSelected,
+        onSelected: (selected) {
+          if (selected) {
+            widget.onStyleSelected(index);
+          }
+        },
+        selectedColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        side: BorderSide(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+          width: isSelected ? 1.5 : 1,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        elevation: 0,
+        pressElevation: 0,
+        showCheckmark: false,
       ),
     );
   }

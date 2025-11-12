@@ -148,7 +148,26 @@ class AppProvider extends ChangeNotifier {
       _state = _state.copyWith(
         generationState: const GenerationStateLoading(
           progress: 0.0,
-          message: 'Generating...',
+          message: 'Preparing images...',
+        ),
+      );
+      notifyListeners();
+
+      // Simulate progress updates
+      await Future.delayed(const Duration(milliseconds: 300));
+      _state = _state.copyWith(
+        generationState: const GenerationStateLoading(
+          progress: 0.2,
+          message: 'Analyzing images...',
+        ),
+      );
+      notifyListeners();
+
+      await Future.delayed(const Duration(milliseconds: 300));
+      _state = _state.copyWith(
+        generationState: const GenerationStateLoading(
+          progress: 0.4,
+          message: 'Generating with AI...',
         ),
       );
       notifyListeners();
@@ -179,12 +198,35 @@ class AppProvider extends ChangeNotifier {
         }
       } else {
         _state = _state.copyWith(
-          generationState: const GenerationStateError('No content generated'),
+          generationState: const GenerationStateError(
+            'No content was generated. Please try again with a different prompt.',
+          ),
         );
       }
+    } on Exception catch (e) {
+      String errorMessage = 'An error occurred';
+      final errorStr = e.toString();
+      
+      if (errorStr.contains('API key')) {
+        errorMessage = 'Invalid API key. Please check your API key in settings.';
+      } else if (errorStr.contains('network') || errorStr.contains('connection')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (errorStr.contains('quota') || errorStr.contains('limit')) {
+        errorMessage = 'API quota exceeded. Please try again later.';
+      } else if (errorStr.contains('timeout')) {
+        errorMessage = 'Request timed out. Please try again.';
+      } else {
+        errorMessage = 'Error: ${errorStr.length > 100 ? '${errorStr.substring(0, 100)}...' : errorStr}';
+      }
+      
+      _state = _state.copyWith(
+        generationState: GenerationStateError(errorMessage),
+      );
     } catch (e) {
       _state = _state.copyWith(
-        generationState: GenerationStateError('Error: ${e.toString()}'),
+        generationState: GenerationStateError(
+          'Unexpected error: ${e.toString().length > 80 ? '${e.toString().substring(0, 80)}...' : e.toString()}',
+        ),
       );
     }
 

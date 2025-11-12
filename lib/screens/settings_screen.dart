@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
+import '../widgets/api_key_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -140,15 +141,20 @@ class SettingsScreen extends StatelessWidget {
         color: hasKey
             ? Theme.of(context).colorScheme.primary
             : Theme.of(context).colorScheme.outline,
+        size: 22,
       ),
       title: const Text('API Key'),
       subtitle: Text(hasKey ? 'Configured' : 'Not set'),
       trailing: Icon(
         hasKey ? Icons.check_circle_rounded : Icons.error_outline_rounded,
         color: hasKey ? Colors.green : Colors.orange,
+        size: 22,
       ),
       onTap: () {
-        // Show API key dialog
+        showDialog(
+          context: context,
+          builder: (context) => const ApiKeyDialog(),
+        );
       },
     );
   }
@@ -158,10 +164,11 @@ class SettingsScreen extends StatelessWidget {
       leading: Icon(
         Icons.dark_mode_rounded,
         color: Theme.of(context).colorScheme.primary,
+        size: 22,
       ),
       title: const Text('Theme'),
-      subtitle: const Text('Dark (Minimalist)'),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      subtitle: const Text('Dark Minimalist'),
+      trailing: const Icon(Icons.check_rounded, size: 22),
     );
   }
 
@@ -170,17 +177,18 @@ class SettingsScreen extends StatelessWidget {
       leading: Icon(
         Icons.speed_rounded,
         color: Theme.of(context).colorScheme.primary,
+        size: 22,
       ),
       title: const Text('High Refresh Rate'),
-      subtitle: const Text('90Hz/120Hz supported on compatible devices'),
+      subtitle: const Text('90Hz/120Hz on supported devices'),
       trailing: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
-          'ENABLED',
+          'ACTIVE',
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
