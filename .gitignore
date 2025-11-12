@@ -88,3 +88,35 @@ lint/tmp/
 
 # Kotlin/Native
 *.bc
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+lib/generated_plugin_registrant.dart
+
+# Coverage
+coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Web related
+lib/generated_plugin_registrant.dart
+
+# IDE
+.vscode/
+*.swp
+*.swo
+*~
+
+# Misc
+.DS_Store
+

@@ -1,6 +1,8 @@
-# NanoBanana - AI Image Editor
+# NanoBanana - AI Image Editor (Flutter)
 
-An advanced Android app powered by Google's Gemini 2.5 Flash Image Preview to transform and enhance your images with AI.
+An advanced Flutter app powered by Google's Gemini AI to transform and enhance your images with AI.
+
+> **Note:** This app has been completely migrated from Android (Kotlin/Jetpack Compose) to Flutter for cross-platform support.
 
 <br>
 <img src="https://github.com/user-attachments/assets/fa7e4138-fc0c-48aa-b8cf-02e9756f6455" width="250"/>
@@ -33,7 +35,8 @@ An advanced Android app powered by Google's Gemini 2.5 Flash Image Preview to tr
 
 ## 📋 Requirements
 
-- **Android 9.0** (API level 28) or higher
+- **Flutter SDK 3.0.0** or higher
+- **Android 5.0** (API level 21) or higher / **iOS 12.0** or higher
 - **Google AI API key** (Gemini API)
 - **Internet connection** for AI processing
 - **100MB+ free storage** for high-resolution images
@@ -53,8 +56,17 @@ cd Android-NanoBanana-Image-Edit
 
 ### 3. Build & Run
 ```bash
-./gradlew assembleDebug
-# Or open in Android Studio and run
+# Get dependencies
+flutter pub get
+
+# Run on connected device
+flutter run
+
+# Build APK for Android
+flutter build apk
+
+# Build for iOS
+flutter build ios
 ```
 
 ## 📖 Usage
@@ -69,22 +81,23 @@ cd Android-NanoBanana-Image-Edit
 
 ## 🏗️ Architecture
 
-NanoBanana follows **Clean Architecture** with **MVVM pattern**:
+NanoBanana follows **Clean Architecture** principles with **Provider** state management:
 
 ```
-Presentation (UI + ViewModel)
+Presentation (Widgets + Provider)
     ↓
-Domain (Use Cases + Models)
+Services (AI Service + Settings)
     ↓
-Data (Repositories + Data Sources)
+Models (Domain Models)
     ↓
-Gemini 2.5 Flash Image Preview API
+Gemini AI API
 ```
 
 **Key Components:**
-- **Domain Layer**: Pure Kotlin business logic, no Android dependencies
-- **Data Layer**: Repository pattern with data sources (API, Cache, Settings)
-- **Presentation Layer**: Jetpack Compose UI with reactive StateFlow
+- **Models**: Pure Dart business logic and data classes
+- **Services**: API integration and data persistence
+- **Providers**: State management using Provider pattern
+- **Widgets**: Reusable Flutter UI components
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture documentation.
 
@@ -111,13 +124,16 @@ See [IMAGE_ENHANCEMENT_GUIDE.md](IMAGE_ENHANCEMENT_GUIDE.md) for complete docume
 ### Run Tests
 ```bash
 # Unit tests
-./gradlew test
+flutter test
 
-# Instrumented tests
-./gradlew connectedAndroidTest
+# Widget tests (requires Flutter SDK)
+flutter test test/
 
-# All tests
-./gradlew check
+# Integration tests
+flutter test integration_test/
+
+# Test coverage
+flutter test --coverage
 ```
 
 ### Coverage
@@ -159,14 +175,14 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ## 📐 Build Information
 
-- **Compile SDK**: 36
-- **Min SDK**: 28
-- **Target SDK**: 36
-- **Kotlin**: 2.0.21
-- **Gradle**: 8.13
-- **AGP**: 8.2.2
+- **Flutter SDK**: 3.0.0+
+- **Dart**: 3.0.0+
+- **Min Android SDK**: 21
+- **Target Android SDK**: 34
+- **Min iOS**: 12.0
+- **Dependencies**: See pubspec.yaml
 
-See [BUILD_OPTIMIZATION.md](BUILD_OPTIMIZATION.md) for optimization details.
+See pubspec.yaml for complete dependency list.
 
 ## 🎯 Roadmap
 
@@ -196,8 +212,8 @@ This project is for educational and personal use. Please ensure you comply with:
 ## 🙏 Acknowledgments
 
 - Google for the Gemini AI API
+- Flutter team for the amazing framework
 - Material Design team for the design system
-- Android team for Jetpack Compose
 - Open source community
 
 ## 📞 Support
@@ -209,6 +225,6 @@ For issues and questions:
 
 ---
 
-**Made with ❤️ using Jetpack Compose and Material Design 3**
+**Made with ❤️ using Flutter and Material Design 3**
 
-**Powered by Gemini 2.5 Flash Image Preview**
+**Powered by Google Gemini AI**
