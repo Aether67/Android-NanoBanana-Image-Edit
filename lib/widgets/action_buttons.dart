@@ -92,12 +92,11 @@ class _ActionButtonsState extends State<ActionButtons>
                       widget.isGenerating ? 'Generating...' : 'Generate',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 15,
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
-                      elevation: widget.canGenerate ? 4 : 0,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                   ),
                 ),
@@ -111,36 +110,21 @@ class _ActionButtonsState extends State<ActionButtons>
           child: AnimatedScale(
             scale: widget.canEnhance && !widget.isGenerating ? 1.0 : 0.95,
             duration: const Duration(milliseconds: 200),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: widget.canEnhance && !widget.isGenerating
-                    ? [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .secondary
-                              .withOpacity(0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ]
-                    : [],
+            child: ElevatedButton.icon(
+              onPressed:
+                  widget.canEnhance && !widget.isGenerating ? widget.onEnhance : null,
+              icon: const Icon(Icons.auto_fix_high_rounded, size: 20),
+              label: const Text(
+                'Enhance',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
-              child: ElevatedButton.icon(
-                onPressed:
-                    widget.canEnhance && !widget.isGenerating ? widget.onEnhance : null,
-                icon: const Icon(Icons.auto_fix_high_rounded, size: 20),
-                label: const Text(
-                  'Enhance',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  elevation: widget.canEnhance ? 3 : 0,
-                ),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                foregroundColor: Theme.of(context).colorScheme.onSecondary,
               ),
             ),
           ),
