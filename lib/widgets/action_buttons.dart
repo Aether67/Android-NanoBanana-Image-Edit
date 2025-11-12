@@ -46,11 +46,15 @@ class _ActionButtonsState extends State<ActionButtons>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          flex: 3,
-          child: AnimatedBuilder(
+    return Semantics(
+      button: true,
+      label: 'Generate AI content',
+      enabled: widget.canGenerate && !widget.isGenerating,
+      child: Row(
+        children: [
+          Expanded(
+            flex: 3,
+            child: AnimatedBuilder(
             animation: _pulseAnimation,
             builder: (context, child) {
               return Transform.scale(
@@ -107,10 +111,14 @@ class _ActionButtonsState extends State<ActionButtons>
         const SizedBox(width: 12),
         Expanded(
           flex: 2,
-          child: AnimatedScale(
-            scale: widget.canEnhance && !widget.isGenerating ? 1.0 : 0.95,
-            duration: const Duration(milliseconds: 200),
-            child: ElevatedButton.icon(
+          child: Semantics(
+            button: true,
+            label: 'Enhance generated image',
+            enabled: widget.canEnhance && !widget.isGenerating,
+            child: AnimatedScale(
+              scale: widget.canEnhance && !widget.isGenerating ? 1.0 : 0.95,
+              duration: const Duration(milliseconds: 200),
+              child: ElevatedButton.icon(
               onPressed:
                   widget.canEnhance && !widget.isGenerating ? widget.onEnhance : null,
               icon: const Icon(Icons.auto_fix_high_rounded, size: 20),
