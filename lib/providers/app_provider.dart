@@ -14,8 +14,23 @@ class AppProvider extends ChangeNotifier {
   late SettingsService _settingsService;
   GeminiAIService? _aiService;
   final ImagePicker _imagePicker = ImagePicker();
+  
+  // Beta features state
+  final Map<String, bool> _betaFeatures = {
+    'beta_batch_processing': false,
+    'beta_image_history': false,
+    'beta_advanced_params': false,
+    'beta_variant_comparison': false,
+  };
 
   MainUiState get state => _state;
+  
+  bool getBetaFeature(String key) => _betaFeatures[key] ?? false;
+  
+  void setBetaFeature(String key, bool value) {
+    _betaFeatures[key] = value;
+    notifyListeners();
+  }
 
   AppProvider() {
     _initializeSettings();

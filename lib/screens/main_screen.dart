@@ -8,6 +8,7 @@ import '../widgets/style_picker_section.dart';
 import '../widgets/prompt_input_section.dart';
 import '../widgets/generation_display.dart';
 import '../widgets/action_buttons.dart';
+import 'settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -41,7 +42,7 @@ class _MainScreenState extends State<MainScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
+      extendBodyBehindAppBar: false,
       appBar: AppBar(
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -49,110 +50,100 @@ class _MainScreenState extends State<MainScreen>
             Icon(
               Icons.auto_awesome_rounded,
               color: Theme.of(context).colorScheme.primary,
-              size: 28,
+              size: 24,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             const Text('NanoBanana'),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_rounded),
-            onPressed: () => _showApiKeyDialog(context),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
             tooltip: 'Settings',
           ),
         ],
-        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
-            ],
-          ),
-        ),
-        child: Consumer<AppProvider>(
-          builder: (context, provider, child) {
-            final state = provider.state;
+      body: Consumer<AppProvider>(
+        builder: (context, provider, child) {
+          final state = provider.state;
 
-            // Show API key dialog if not set
-            if (state.apiKey.isEmpty) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _showApiKeyDialog(context);
-              });
-            }
+          // Show API key dialog if not set
+          if (state.apiKey.isEmpty) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showApiKeyDialog(context);
+            });
+          }
 
-            return SafeArea(
-              child: SingleChildScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildSection(
-                      index: 0,
-                      child: ImagePickerSection(
-                        selectedImages: state.selectedImages,
-                        onPickImages: provider.pickImages,
-                        onRemoveImage: provider.removeSelectedImage,
-                        onClearImages: provider.clearSelectedImages,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSection(
-                      index: 1,
-                      child: StylePickerSection(
-                        selectedIndex: state.selectedStyleIndex,
-                        onStyleSelected: provider.updateStyleIndex,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSection(
-                      index: 2,
-                      child: PromptInputSection(
-                        prompt: state.currentPrompt,
-                        onPromptChanged: provider.updatePrompt,
-                        enabled: state.selectedStyleIndex == 4,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _buildSection(
-                      index: 3,
-                      child: ActionButtons(
-                        canGenerate: state.selectedImages.isNotEmpty &&
-                            state.currentPrompt.isNotEmpty &&
-                            state.apiKey.isNotEmpty,
-                        isGenerating:
-                            state.generationState is GenerationStateLoading,
-                        onGenerate: () {
-                          provider.generateContent(null);
-                          _scrollToBottom();
-                        },
-                        onEnhance: () => provider.enhanceImage(),
-                        canEnhance:
-                            state.generationState is GenerationStateSuccess,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    GenerationDisplay(
-                      generationState: state.generationState,
-                      enhancementState: state.enhancementState,
-                      onReset: provider.resetToIdle,
-                      onSaveVariant: provider.saveAsVariant,
-                    ),
-                    const SizedBox(height: 24),
-                  ],
+          return SingleChildScrollView(
+            controller: _scrollController,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildSection(
+                  index: 0,
+                  child: ImagePickerSection(
+                    selectedImages: state.selectedImages,
+                    onPickImages: provider.pickImages,
+                    onRemoveImage: provider.removeSelectedImage,
+                    onClearImages: provider.clearSelectedImages,
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+                const SizedBox(height: 12),
+                _buildSection(
+                  index: 1,
+                  child: StylePickerSection(
+                    selectedIndex: state.selectedStyleIndex,
+                    onStyleSelected: provider.updateStyleIndex,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildSection(
+                  index: 2,
+                  child: PromptInputSection(
+                    prompt: state.currentPrompt,
+                    onPromptChanged: provider.updatePrompt,
+                    enabled: state.selectedStyleIndex == 4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildSection(
+                  index: 3,
+                  child: ActionButtons(
+                    canGenerate: state.selectedImages.isNotEmpty &&
+                        state.currentPrompt.isNotEmpty &&
+                        state.apiKey.isNotEmpty,
+                    isGenerating:
+                        state.generationState is GenerationStateLoading,
+                    onGenerate: () {
+                      provider.generateContent(null);
+                      _scrollToBottom();
+                    },
+                    onEnhance: () => provider.enhanceImage(),
+                    canEnhance:
+                        state.generationState is GenerationStateSuccess,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GenerationDisplay(
+                  generationState: state.generationState,
+                  enhancementState: state.enhancementState,
+                  onReset: provider.resetToIdle,
+                  onSaveVariant: provider.saveAsVariant,
+                ),
+                const SizedBox(height: 24),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
